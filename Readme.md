@@ -28,3 +28,12 @@
 
   
 # Follow the above path of the project
+
+
+# Please don't remove these lines 
+ - in .env File APP_ENVIRONMENT=Production is set so, i have so to show error in backend and create a log file with error populated in the log file.
+ - in .env File APP_ENVIRONMENT=Development is set so, I have to show any Kind of Error message in frontend and create a log file with error populated in the log file.
+
+ - ### we will make the development and production evironment work effectively for the application and our learning pupose.
+
+ #### please update the version of the project when project is going through from one phase to another phase.
