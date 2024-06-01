@@ -1,0 +1,13 @@
+2024-06-01T19:59:09.072Z - This is a test error
+Error: This is a test error
+    at C:\Freelance\MedicalStore\src\Configs\routes.js:16:23
+    at Layer.handle [as handle_request] (C:\Freelance\MedicalStore\node_modules\express\lib\router\layer.js:95:5)
+    at trim_prefix (C:\Freelance\MedicalStore\node_modules\express\lib\router\index.js:328:13)
+    at C:\Freelance\MedicalStore\node_modules\express\lib\router\index.js:286:9
+    at Function.process_params (C:\Freelance\MedicalStore\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Freelance\MedicalStore\node_modules\express\lib\router\index.js:280:10)
+    at C:\Freelance\MedicalStore\node_modules\express\lib\router\index.js:646:15
+    at next (C:\Freelance\MedicalStore\node_modules\express\lib\router\index.js:265:14)
+    at Function.handle (C:\Freelance\MedicalStore\node_modules\express\lib\router\index.js:175:3)
+    at router (C:\Freelance\MedicalStore\node_modules\express\lib\router\index.js:47:12)
+

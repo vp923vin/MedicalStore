@@ -4,6 +4,7 @@ const path = require('path');
 require('./src/Configs/db');
 const configRoutes = require('./src/Configs/routes');
 const { appConfig } = require('./src/Configs/app');
+const errorMiddleware  = require('./src/Middlewares/errorMiddleware');
 const app = express();
 
 app.set('views', path.join(__dirname, 'src', 'Views'));
@@ -14,6 +15,8 @@ configRoutes(app);
 app.get('/', (req, res) => {
     res.send("Nodejs Env Is Set");
 });
+
+app.use(errorMiddleware);
 
 app.listen(appConfig.port, async () => {
     console.log(`Server is started at port ${appConfig.port} and browser uri is ${appConfig.url}:${appConfig.port},
