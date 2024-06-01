@@ -37,3 +37,5 @@
  - ### we will make the development and production evironment work effectively for the application and our learning pupose.
 
  #### please update the version of the project when project is going through from one phase to another phase.
+
+ ## please contributor don't forget to create a new branch and write the code in that branch and commit the branch and don't I will merge the code and before modifying the code next please make a pull request so you can contribute in the updated code.
