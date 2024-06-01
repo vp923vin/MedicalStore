@@ -1,0 +1,32 @@
+{
+  "name": "medicalstore",
+  "version": "1.0.0",
+  "description": "medical store app apis project",
+  "main": "server.js",
+  "scripts": {
+    "test": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vp923vin/MedicalStore.git"
+  },
+  "keywords": [
+    "Medical",
+    "Medical",
+    "store",
+    "Medicines",
+    "Hospital"
+  ],
+  "author": "Vipin Patel, Contributed by Amit Carpenter",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/vp923vin/MedicalStore/issues"
+  },
+  "homepage": "https://github.com/vp923vin/MedicalStore#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.10.0"
+  }
+}
