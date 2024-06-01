@@ -1,8 +1,9 @@
 const express = require('express');
 const path = require('path');
 
-require('./src/Config/db');
-
+require('./src/Configs/db');
+const configRoutes = require('./src/Configs/routes');
+const { appConfig } = require('./src/Configs/app');
 const app = express();
 
 app.set('views', path.join(__dirname, 'src', 'Views'));
@@ -14,7 +15,7 @@ app.get('/', (req, res) => {
     res.send("Nodejs Env Is Set");
 });
 
-app.listen(port, async () => {
-    console.log(`Server is started at port ${port} and browser uri is ${url}:${port},
-    app name is ${appName} and Environment is Set ${environment}`)
+app.listen(appConfig.port, async () => {
+    console.log(`Server is started at port ${appConfig.port} and browser uri is ${appConfig.url}:${appConfig.port},
+    app name is ${appConfig.appName} and Environment is Set ${appConfig.appEnvironment}`)
 });
