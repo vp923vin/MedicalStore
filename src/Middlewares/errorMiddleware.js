@@ -1,15 +1,19 @@
 const fs = require('fs');
 const path = require('path');
-const  { appConfig } = require('../Configs/app');
+const { appConfig } = require('../Configs/app');
+
 const errorMiddleware = (err, req, res, next) => {
   const env = appConfig.appEnvironment;
-
-  if (env === 'Development') {
+  console.log(env); 
+  console.log('Error middleware hit'); 
+  if (env == 'Development') {
+    // Development environment: return error details
     res.status(err.status || 500).json({
       message: err.message,
       stack: err.stack,
     });
   } else {
+    // Production environment: log error details to a file and return generic message
     const logDir = path.join(__dirname, '..', '..', 'public', 'error', 'storage');
     if (!fs.existsSync(logDir)) {
       fs.mkdirSync(logDir, { recursive: true });
@@ -25,3 +29,4 @@ const errorMiddleware = (err, req, res, next) => {
 };
 
 module.exports = errorMiddleware;
+

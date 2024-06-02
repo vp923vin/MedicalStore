@@ -3,6 +3,7 @@ const emailConfigs = {
     mailer: process.env.MAIL_MAILER,
     host: process.env.MAIL_HOST,
     port: process.env.MAIL_PORT,
+    secure: process.env.MAIL_SECURE,
     username: process.env.MAIL_USERNAME,
     password: process.env.MAIL_PASSWORD,
     encryption: process.env.MAIL_ENCRYPTION,
