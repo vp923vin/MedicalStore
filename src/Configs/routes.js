@@ -17,10 +17,10 @@ module.exports = (app) => {
     //     error.status = 500;
     //     next(error);
     // });
-    // app.use((req, res, next) => {
-    //     const error = new Error('Not Found');
-    //     error.status = 404;
-    //     next(error);
-    // });
-    // app.use(errorMiddleware);
+    app.use((req, res, next) => {
+        const err = new Error('Not Found');
+        err.status = 404;
+        next(err);
+    });
+    app.use(errorMiddleware);
 };

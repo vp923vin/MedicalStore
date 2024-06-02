@@ -11,12 +11,14 @@ const app = express();
 app.set('views', path.join(__dirname, 'src', 'Views'));
 app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, 'public')));
+
 configRoutes(app);
 
 app.get('/', (req, res) => {
     res.send("Nodejs Env Is Set");
 });
 
+// app.use(errorMiddleware);
 
 initializeDatabase().then(() => {
     app.listen(appConfig.port, () => {
