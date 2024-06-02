@@ -14,7 +14,7 @@ const errorMiddleware = (err, req, res, next) => {
     });
   } else {
     // Production environment: log error details to a file and return generic message
-    const logDir = path.join(__dirname, '..', '..', 'public', 'error', 'storage');
+    const logDir = path.join(__dirname, '..', '..', 'public', 'logs');
     if (!fs.existsSync(logDir)) {
       fs.mkdirSync(logDir, { recursive: true });
     }

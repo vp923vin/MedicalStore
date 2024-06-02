@@ -5,12 +5,12 @@ require('./src/Configs/db');
 const configRoutes = require('./src/Configs/routes');
 const { appConfig } = require('./src/Configs/app');
 const errorMiddleware  = require('./src/Middlewares/errorMiddleware');
+const initializeDatabase = require('./src/Services/Utils/dbSync');
 const app = express();
 
 app.set('views', path.join(__dirname, 'src', 'Views'));
 app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, 'public')));
-// app.use(errorMiddleware);
 configRoutes(app);
 
 app.get('/', (req, res) => {
@@ -18,7 +18,9 @@ app.get('/', (req, res) => {
 });
 
 
-app.listen(appConfig.port, async () => {
-    console.log(`Server is started at port ${appConfig.port} and browser uri is ${appConfig.url}:${appConfig.port},
-    app name is ${appConfig.appName} and Environment is Set ${appConfig.appEnvironment}`)
+initializeDatabase().then(() => {
+    app.listen(appConfig.port, () => {
+        console.log(`Server is started at port ${appConfig.port} and browser url is ${appConfig.url}:${appConfig.port}`);
+        console.log(`App name is ${appConfig.appName} and Environment is Set ${appConfig.appEnvironment}`);
+    });
 });
