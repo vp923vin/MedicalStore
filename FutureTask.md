@@ -20,3 +20,22 @@
 ------------------------------------------------------------------------------------------------
 #### Updates Start from below.
 
+Task Description:
+  - Complete the jwt based authentication
+    login, register, forget_password with email. 
+    #### status: pending.
+  - for user role table
+    perform crud operation where admin  manage those values create, update, read and delete the roles.
+    #### status: pending.
+  - user profile create, update, delete in user end and admin end so admin can also manage user profile.
+    but can update from admin end.
+    #### status: pending.
+  #### Note:  
+      thats it todays tasks.
+      finish these taks todays.
+      update these tasks with time stamps.
+
+
+
+
+
