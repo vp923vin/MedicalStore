@@ -1,14 +1,21 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../Configs/db');
-const Category = require('./categoryModel');
+const User = require('./userModel');
 
-const Product = sequelize.define('Product', {
-    product_id: {
+const DeliveryOption = sequelize.define('DeliveryOption', {
+    delivery_option_id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
     },
-    name: {
+    user_id: {
+        type: DataTypes.INTEGER,
+        references: {
+            model: 'users',
+            key: 'user_id'
+        }
+    },
+    option_name: {
         type: DataTypes.STRING,
         allowNull: false
     },
@@ -16,24 +23,9 @@ const Product = sequelize.define('Product', {
         type: DataTypes.TEXT,
         allowNull: true
     },
-    price: {
+    cost: {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false
-    },
-    category_id: {
-        type: DataTypes.INTEGER,
-        references: {
-            model: 'categories',
-            key: 'category_id'
-        }
-    },
-    sku: {
-        type: DataTypes.STRING,
-        allowNull: true
-    },
-    product_image: {
-        type: DataTypes.STRING,
-        allowNull: true
     },
     created_at: {
         type: DataTypes.DATE,
@@ -44,12 +36,12 @@ const Product = sequelize.define('Product', {
         defaultValue: DataTypes.NOW
     }
 }, {
-    tableName: 'products',
+    tableName: 'delivery_options',
     timestamps: false
 });
 
 // Associations
-Product.belongsTo(Category, { foreignKey: 'category_id' });
-Category.hasMany(Product, { foreignKey: 'category_id' });
+DeliveryOption.belongsTo(User, { foreignKey: 'user_id' });
+User.hasMany(DeliveryOption, { foreignKey: 'user_id' });
 
-module.exports = Product;
+module.exports = DeliveryOption;

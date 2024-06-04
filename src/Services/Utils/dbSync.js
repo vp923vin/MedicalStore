@@ -1,10 +1,17 @@
 const sequelize = require('../../Configs/db');
-const User = require('../../Models/userModel');
-const DeliveryAddress = require('../../Models/deliveryAddressModel');
+const Role = require('../../Models/userRoleModel');
 const Category = require('../../Models/categoryModel');
+const User = require('../../Models/userModel');
 const Product = require('../../Models/productModel');
+const DeliveryOption = require('../../Models/deliveryOptionModel');
 const Order = require('../../Models/orderModel');
+const OrderItem = require('../../Models/orderItemModel');
+const Payment = require('../../Models/paymentModel');
 const Invoice = require('../../Models/invoiceModel');
+const Inventory = require('../../Models/inventoryModel');
+const OrderStatus = require('../../Models/orderStatusModel');
+const Prescription = require('../../Models/prescriptionModel');
+const PasswordReset = require('../../Models/passwordResetModel');
 
 const initializeDatabase = async () => {
     try {

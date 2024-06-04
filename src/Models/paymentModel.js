@@ -2,8 +2,8 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../Configs/db');
 const Order = require('./orderModel');
 
-const Invoice = sequelize.define('Invoice', {
-    invoice_id: {
+const Payment = sequelize.define('Payment', {
+    payment_id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
@@ -15,17 +15,21 @@ const Invoice = sequelize.define('Invoice', {
             key: 'order_id'
         }
     },
-    invoice_date: {
-        type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW
-    },
-    total_amount: {
+    amount: {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false
     },
-    billing_address: {
-        type: DataTypes.TEXT,
-        allowNull: true
+    payment_date: {
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW
+    },
+    payment_method: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    status: {
+        type: DataTypes.STRING,
+        allowNull: false
     },
     created_at: {
         type: DataTypes.DATE,
@@ -36,12 +40,12 @@ const Invoice = sequelize.define('Invoice', {
         defaultValue: DataTypes.NOW
     }
 }, {
-    tableName: 'invoices',
+    tableName: 'payments',
     timestamps: false
 });
 
 // Associations
-Invoice.belongsTo(Order, { foreignKey: 'order_id' });
-Order.hasMany(Invoice, { foreignKey: 'order_id' });
+Payment.belongsTo(Order, { foreignKey: 'order_id' });
+Order.hasMany(Payment, { foreignKey: 'order_id' });
 
-module.exports = Invoice;
+module.exports = Payment;

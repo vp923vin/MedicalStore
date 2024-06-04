@@ -1,10 +1,10 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../Configs/db');
 const User = require('./userModel');
-const DeliveryOption = require('./deliveryOptionModel');
+const Product = require('./productModel');
 
-const Order = sequelize.define('Order', {
-    order_id: {
+const Prescription = sequelize.define('Prescription', {
+    prescription_id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
@@ -16,26 +16,26 @@ const Order = sequelize.define('Order', {
             key: 'user_id'
         }
     },
-    total_amount: {
-        type: DataTypes.DECIMAL(10, 2),
-        allowNull: false
+    product_id: {
+        type: DataTypes.INTEGER,
+        references: {
+            model: 'products',
+            key: 'product_id'
+        }
     },
-    order_date: {
-        type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW
-    },
-    status: {
+    doctor_name: {
         type: DataTypes.STRING,
         allowNull: false
     },
-    delivery_option_id: {
-        type: DataTypes.INTEGER,
-        references: {
-            model: 'delivery_options',
-            key: 'delivery_option_id'
-        }
+    prescription_date: {
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW
     },
-    shipping_address: {
+    prescription_image: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    notes: {
         type: DataTypes.TEXT,
         allowNull: true
     },
@@ -48,15 +48,15 @@ const Order = sequelize.define('Order', {
         defaultValue: DataTypes.NOW
     }
 }, {
-    tableName: 'orders',
+    tableName: 'prescriptions',
     timestamps: false
 });
 
 // Associations
-Order.belongsTo(User, { foreignKey: 'user_id' });
-User.hasMany(Order, { foreignKey: 'user_id' });
+Prescription.belongsTo(User, { foreignKey: 'user_id' });
+User.hasMany(Prescription, { foreignKey: 'user_id' });
 
-Order.belongsTo(DeliveryOption, { foreignKey: 'delivery_option_id' });
-DeliveryOption.hasMany(Order, { foreignKey: 'delivery_option_id' });
+Prescription.belongsTo(Product, { foreignKey: 'product_id' });
+Product.hasMany(Prescription, { foreignKey: 'product_id' });
 
-module.exports = Order;
+module.exports = Prescription;
