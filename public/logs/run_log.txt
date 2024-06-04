@@ -1,1 +1,0 @@
-{"method":"GET","path":"/api/welcome-emails","status":404,"timestamp":"2024-06-02T21:14:15.857Z"}

@@ -3,7 +3,7 @@ const { sendWelcomeEmail } = require('../Controllers/testController');
 const router = express.Router();
 
 router.get('/', (req, res) => {
-    res.send("Hello, world!");
+    res.json({ message: 'Admin access' });
 });
 
 router.post('/welcome-email', sendWelcomeEmail);
