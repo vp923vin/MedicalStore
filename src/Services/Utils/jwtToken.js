@@ -14,6 +14,18 @@ const generateToken = (user) => {
     }
 };
 
+const generatePayloadToken = (payload) => {
+    try {
+        const token = jwt.sign(payload, secretKey, { expiresIn: '1h' });
+        console.log(token);
+        return token;
+    } catch (error) {
+        console.error('Error generating token:', error);
+        throw error;
+    }
+};
+
 module.exports = {
-    generateToken
+    generateToken,
+    generatePayloadToken
 }

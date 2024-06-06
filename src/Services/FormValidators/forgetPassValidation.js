@@ -2,7 +2,7 @@ const { body } = require('express-validator');
 const validator = require('validator');
 const User = require('../../Models/userModel');
 
-const loginValidationRules = () => {
+const forgetPasswordValidationRules = () => {
   return [
     body('email').custom(async (value, { req }) => {
         if (!value) {
@@ -13,15 +13,13 @@ const loginValidationRules = () => {
         }
         const existingUser = await User.findOne({ where: { email: value } });
         if (!existingUser) {
-            throw new Error('Invalid email or Password');
+            throw new Error('User Not Exists');
         }
         return true;
-      }),
-    body('password')
-      .notEmpty().withMessage('Password is required'),
+      })
   ];
 };
 
 module.exports = {
-  loginValidationRules,
+  forgetPasswordValidationRules,
 };
