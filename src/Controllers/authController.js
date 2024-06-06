@@ -94,7 +94,7 @@ const login = async (req, res) => {
             });
         }
         const token = await generateToken(user);
-        res.status(200).json({
+        return res.status(200).json({
             status: 'success',
             statusCode: 200,
             message: 'Login successfully',
@@ -183,6 +183,8 @@ const forgetPassword = async (req, res) => {
 const verifyOTP = async () => {};
 
 const resetPassword = async () => {};
+
+const logout = async () => {};
 
 module.exports = {
     register,

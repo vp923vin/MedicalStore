@@ -21,9 +21,13 @@
 #### Updates Start from below.
 
 Task Description:
+
+  #### Date: 06/06/2024
   - Complete the jwt based authentication
     login, register, forget_password with email.( this function wiil also for all roles then also mange the role in token )
-    #### status: pending.
+    #### status: completed.
+
+  #### Date: 06/06/2024
   - for user role table
     perform crud operation where admin  manage those values create, update, read and delete the roles.
     #### status: pending.
