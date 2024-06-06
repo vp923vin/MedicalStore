@@ -11,11 +11,11 @@ module.exports = (app) => {
     app.use('/api/admin', adminRoutes);
     app.use('/api/auth', authRoutes);
     app.use('/api', userRoutes);  
-    app.use(activityLogger);
-    app.use((req, res, next) => {
-      const error = new Error(`Cannot find ${req.originalUrl}`);
-      res.status(404);
-      next(error);
-    });
-    app.use(errorMiddleware);
+    // app.use(activityLogger);
+    // app.use((req, res, next) => {
+    //   const error = new Error(`Cannot find ${req.originalUrl}`);
+    //   res.status(404);
+    //   next(error);
+    // });
+    // app.use(errorMiddleware);
 };
