@@ -146,7 +146,7 @@ const forgetPassword = async (req, res) => {
             otp: otp,
             otp_reason: 'password_reset',
             createdAt: new Date(),
-            expiresAt: new Date(Date.now() + 60 * 60 * 1000) 
+            expiresAt: new Date(Date.now() + 60 * 60 * 1000)
         });
         const token = await generatePayloadToken({
             user_id: user.user_id,
@@ -155,14 +155,14 @@ const forgetPassword = async (req, res) => {
         const emailTemplatePath = path.join(__dirname, '..', 'Views', 'emails', 'otpSend.ejs');
 
         const emailTemplate = await ejs.renderFile(emailTemplatePath, {
-            name: user.username, 
-            otp: otp, 
-            appName: appConfig.appName 
+            name: user.username,
+            otp: otp,
+            appName: appConfig.appName
         });
         const subject = 'Forget Password - Otp';
         const text = `Forget Password - Otp`;
         await sendMail(email, subject, text, emailTemplate);
-        res.status(200).json({ 
+        return res.status(200).json({
             status: 'success',
             statusCode: 200,
             message: 'Password reset OTP sent successfully',
@@ -180,11 +180,11 @@ const forgetPassword = async (req, res) => {
     }
 };
 
-const verifyOTP = async () => {};
+const verifyOTP = async () => { };
 
-const resetPassword = async () => {};
+const resetPassword = async () => { };
 
-const logout = async () => {};
+const logout = async () => { };
 
 module.exports = {
     register,
