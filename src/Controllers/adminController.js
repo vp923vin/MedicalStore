@@ -1,7 +1,9 @@
 const { validationResult } = require('express-validator');
+const User = require('../Models/userModel');
 const Role = require('../Models/userRoleModel');
 const formatErrors = require('../Services/Utils/formErrorFormat');
 
+// roles defined 
 const createRole = async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -124,10 +126,132 @@ const deleteRole = async (req, res) => {
     }
 };
 
+// user actiond by admin
+const listAllUsers = async (req, res) => {
+    try {
+        const users = await User.findAll({
+            include: {
+                model: Role,
+                attributes: ['role_name'],
+            }
+        });
+
+        res.status(200).json({
+            status: 'success',
+            statusCode: 200,
+            message: 'Users fetched successfully',
+            data: {all_users: users},
+        });
+    } catch (error) {
+        res.status(500).json({
+            status: 'failed',
+            statusCode: 500,
+            message: 'Something went wrong in server.',
+            error: error.message,
+        });
+    }
+};
+
+const getUserProfile = async (req, res) => {
+    const { userId } = req.params;
+    try {
+        const user = await User.findByPk(userId);
+        if (!user) {
+            return res.status(404).json({
+                status: 'failed',
+                statusCode: 404,
+                message: "Unable to fetch",
+                errors: [{
+                    message: "User not found"
+                }],
+            });
+        }
+        return res.status(200).json({
+            status: 'success',
+            statusCode: 200,
+            message: 'User profile get successfully',
+            data: { profile: user },
+        });
+    } catch (error) {
+        return res.status(500).json({
+            status: 'failed',
+            statusCode: 500,
+            message: 'Something went wrong in server.',
+            error: error.message
+        });
+    }
+};
+
+const updateUserProfile = async (req, res) => {
+    const { userId } = req.params;
+    try {
+        const user = await User.findByPk(userId);
+        if (!user) {
+            return res.status(404).json({
+                status: 'failed',
+                statusCode: 404,
+                message: "Unable to fetch",
+                errors: [{
+                    message: "User not found"
+                }],
+            });
+        }
+        await user.update(req.body);
+        return res.status(200).json({
+            status: 'success',
+            statusCode: 200,
+            message: 'Profile updated successfully',
+            data: { updated_profile: user },
+        });
+    } catch (error) {
+        return res.status(500).json({
+            status: 'failed',
+            statusCode: 500,
+            message: 'Something went wrong in server.',
+            error: error.message
+        });
+    }
+};
+
+const deleteUserProfile = async (req, res) => {
+    const { userId } = req.params;
+    try {
+        const user = await User.findByPk(userId);
+        if (!user) {
+            return res.status(404).json({
+                status: 'failed',
+                statusCode: 404,
+                message: "Unable to fetch",
+                errors: [{
+                    message: "User not found"
+                }],
+            });
+        }
+        await user.destroy();
+        return res.status(200).json({
+            status: 'success',
+            statusCode: 200,
+            message: 'User deleted successfully',
+            data: { deleted_user: user },
+        });
+    } catch (error) {
+        return res.status(500).json({
+            status: 'failed',
+            statusCode: 500,
+            message: 'Something went wrong in server.',
+            error: error.message
+        });
+    }
+};
+
 
 module.exports = {
     createRole,
     getRoles,
     updateRole,
-    deleteRole
+    deleteRole,
+    listAllUsers,
+    getUserProfile,
+    updateUserProfile,
+    deleteUserProfile
 };

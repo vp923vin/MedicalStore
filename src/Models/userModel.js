@@ -40,6 +40,11 @@ const User = sequelize.define('User', {
     type: DataTypes.DATE,
     allowNull: true
   },
+  is_active: {
+    type: DataTypes.ENUM('active', 'deactive'),
+    defaultValue: 'active',
+    allowNull: false
+  },
   created_at: {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW
@@ -51,6 +56,21 @@ const User = sequelize.define('User', {
 }, {
   tableName: 'users',
   timestamps: false,
+  defaultScope: {
+    attributes: { exclude: ['password'] }
+  },
+  scopes: {
+    withPassword: {
+      attributes: {}
+    }
+  },
+  instanceMethods: {
+    toJSON: function() {
+      const values = Object.assign({}, this.get());
+      delete values.password;
+      return values;
+    }
+  }
 });
 
 // Associations

@@ -30,10 +30,16 @@ Task Description:
   #### Date: 06/06/2024
   - for user role table
     perform crud operation where admin  manage those values create, update, read and delete the roles.
-    #### status: pending.
+    #### status: completed.
+
+  #### Date: 07/06/2024
   - user profile create, update, delete in user end and admin end so admin can also manage user profile.
     but can update from admin end.
-    #### status: pending.
+    #### status: completed.
+
+  #### Date: 
+  - Now authenticate routes and moves next utill modify the above tasks small small changes done.
+  #### status: completed.
   #### Note:  
       thats it todays tasks.
       finish these taks todays.
