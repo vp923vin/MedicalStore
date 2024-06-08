@@ -11,14 +11,12 @@ const hashPassword = async (password) => {
   }
 };
 
-
 const comparePassword = async (password, userPassword) => {
     try {
         return await bcrypt.compare(password, userPassword);
       } catch (error) {
         console.error('Error in hashPassword function:', error);
         throw new Error('Invalid password');
-        return false;
       }
 };
 

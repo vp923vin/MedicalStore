@@ -1,7 +1,6 @@
-const bcrypt = require('bcrypt');
-const { validationResult } = require('express-validator');
 const ejs = require('ejs');
 const path = require('path');
+const { validationResult } = require('express-validator');
 
 const User = require('../Models/userModel');
 const Role = require('../Models/userRoleModel');
@@ -141,22 +140,26 @@ const forgetPassword = async (req, res) => {
             });
         }
         const otp = generateRandomNumber();
+        const otpExpiry = new Date(Date.now() + 60 * 60 * 1000);
+        const token = await generatePayloadToken({
+            user_id: user.user_id,
+            otp_expiry: otpExpiry,
+            otp_reason: 'password_reset',
+        });
         await OtpManager.create({
             user_id: user.user_id,
             otp: otp,
+            auth_token: token,
             otp_reason: 'password_reset',
             createdAt: new Date(),
-            expiresAt: new Date(Date.now() + 60 * 60 * 1000)
-        });
-        const token = await generatePayloadToken({
-            user_id: user.user_id,
-            otp_reason: 'password_reset',
+            expiresAt: otpExpiry
         });
         const emailTemplatePath = path.join(__dirname, '..', 'Views', 'emails', 'otpSend.ejs');
 
         const emailTemplate = await ejs.renderFile(emailTemplatePath, {
             name: user.username,
             otp: otp,
+            otp_expiry: otpExpiry,
             appName: appConfig.appName
         });
         const subject = 'Forget Password - Otp';
@@ -168,6 +171,7 @@ const forgetPassword = async (req, res) => {
             message: 'Password reset OTP sent successfully',
             data: {
                 token: token,
+                otp_expiry: otpExpiry,
             }
         });
     } catch (error) {
@@ -180,14 +184,220 @@ const forgetPassword = async (req, res) => {
     }
 };
 
-const verifyOTP = async () => { };
+const verifyOTP = async (req, res) => {
+    const authHeader = req.headers['authorization'];
+    if (!authHeader) {
+        return res.status(401).json({
+            status: 'failed',
+            statusCode: 401,
+            message: 'Unauthorized',
+            errors: [{message: 'Unauthorized'}]
+        });
+    }
 
-const resetPassword = async () => { };
+    const token = authHeader.split(' ')[1];
+    const { otp } = req.body;
 
-const logout = async () => { };
+    try {
+        const decoded = await jwt.verify(token, appConfig.jwtSecret);
+        const otpEntry = await OtpManager.findOne({
+            where: {
+                user_id: decoded.user_id,
+                otp: otp,
+                auth_token: token,
+                otp_reason: decoded.otp_reason,
+                expiresAt: { [Op.gt]: new Date() }
+            }
+        });
+
+        if (!otpEntry) {
+            return res.status(400).json({
+                status: 'failed',
+                statusCode: 400,
+                message: 'Invalid or expired OTP',
+            });
+        }
+        const genNewToken = await generatePayloadToken({
+            user_id: decoded.user_id,
+            otp_expiry: 'Expired',
+            otp_reason: 'password_reset',
+        });
+        await otpEntry.update({
+            otp: null,
+            expiresAt: null,
+            auth_token: genNewToken,
+        });
+
+        return res.status(200).json({
+            status: 'success',
+            statusCode: 200,
+            message: 'OTP verified successfully',
+        });
+    } catch (error) {
+        return res.status(500).json({
+            status: 'failed',
+            statusCode: 500,
+            message: 'Something went wrong in server.',
+            error: error.message
+        });
+    }
+};
+
+const resendOTP = async (req, res) => {
+    const authHeader = req.headers['authorization'];
+    if (!authHeader) {
+        return res.status(401).json({
+            status: 'failed',
+            statusCode: 401,
+            message: 'Unauthorized',
+            errors: [{message: 'Unauthorized'}]
+        });
+    }
+
+    const token = authHeader.split(' ')[1];
+
+    try {
+        const decoded = await jwt.verify(token, appConfig.jwtSecret);
+        const user = await User.findByPk(decoded.user_id);
+        if (!user) {
+            return res.status(400).json({
+                status: 'failed',
+                statusCode: 400,
+                message: 'User Not Exists',
+                errors: [{ message: 'User Not Exists' }]
+            });
+        }
+
+        const otp = generateRandomNumber();
+        const otpExpiry = new Date(Date.now() + 60 * 60 * 1000);
+        const genNewToken = await generatePayloadToken({
+            user_id: user.user_id,
+            otp_expiry: otpExpiry,
+            otp_reason: 'password_reset',
+        });
+        await OtpManager.update({
+            otp: otp,
+            auth_token: genNewToken,
+            expiresAt: otpExpiry,
+            createdAt: new Date(),
+        }, {
+            where: { 
+                auth_token: token, 
+                otp_reason: 'password_reset', 
+                user_id: user.user_id,
+            }
+        });
+
+        const emailTemplatePath = path.join(__dirname, '..', 'Views', 'emails', 'otpSend.ejs');
+
+        const emailTemplate = await ejs.renderFile(emailTemplatePath, {
+            name: user.username,
+            otp: otp,
+            otp_expiry: otpExpiry,
+            appName: appConfig.appName
+        });
+
+        const subject = 'Forget Password - OTP Resend';
+        const text = `Forget Password - OTP Resend`;
+        await sendMail(user.email, subject, text, emailTemplate);
+        return res.status(200).json({
+            status: 'success',
+            statusCode: 200,
+            message: 'OTP resent successfully',
+        });
+    } catch (error) {
+        return res.status(500).json({
+            status: 'failed',
+            statusCode: 500,
+            message: 'Something went wrong in server.',
+            error: error.message
+        });
+    }
+};
+
+
+const resetPassword = async (req, res) => {
+    const authHeader = req.headers['authorization'];
+    if (!authHeader) {
+        return res.status(401).json({
+            status: 'failed',
+            statusCode: 401,
+            message: 'Unauthorized',
+            errors: [{message: 'Unauthorized'}]
+        });
+    }
+
+    const token = authHeader.split(' ')[1];
+    const decoded = await jwt.verify(token, appConfig.jwtSecret);
+    if(decoded.otp_expiry != 'Expired'){
+        return res.status(400).json({
+            status: 'failed',
+            statusCode: 400,
+            message: 'Invalid Request',
+            errors: [{ message: 'Invalid Request'}]
+        });
+    }
+    const { newPassword, confirmPassword } = req.body;
+
+    if (newPassword !== confirmPassword) {
+        return res.status(400).json({
+            status: 'failed',
+            statusCode: 400,
+            message: 'Passwords do not match',
+            errors: [{ message: 'Passwords do not match'}]
+        });
+    }
+
+    try {
+        const otpEntry = await OtpManager.findOne({
+            where: {
+                user_id: decoded.user_id,
+                otp: null,
+                auth_token: token,
+                otp_reason: 'password_reset',
+                expiresAt: null,
+            }
+        });
+
+        if (!otpEntry) {
+            return res.status(400).json({
+                status: 'failed',
+                statusCode: 400,
+                message: 'Invalid or expired OTP',
+                errors: [{ message: 'Invalid or expired OTP'}]
+            });
+        }
+
+        const hashedPassword = await hashPassword(newPassword);
+        await User.update({ password: hashedPassword }, { where: { user_id: decoded.user_id } });
+
+        return res.status(200).json({
+            status: 'success',
+            statusCode: 200,
+            message: 'Password reset successfully',
+        });
+    } catch (error) {
+        return res.status(500).json({
+            status: 'failed',
+            statusCode: 500,
+            message: 'Something went wrong in server.',
+            error: error.message
+        });
+    }
+};
+
+
+const logout = async (req, res) => { 
+
+};
 
 module.exports = {
     register,
     login,
+    verifyEmail,
     forgetPassword,
+    verifyOTP,
+    resendOTP,
+    resetPassword,
+    logout
 }

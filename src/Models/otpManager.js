@@ -19,6 +19,10 @@ const OtpManager = sequelize.define('OtpManager', {
     type: DataTypes.STRING,
     allowNull: true
   },
+  auth_token: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
   otp_reason: {
     type: DataTypes.ENUM('order_payment', 'password_reset', 'email_verify', 'login_user', 'order_delivered'),
     allowNull: true

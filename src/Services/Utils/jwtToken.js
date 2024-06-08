@@ -25,7 +25,17 @@ const generatePayloadToken = (payload) => {
     }
 };
 
+const validateToken = (token) => { 
+
+};
+
+const decodeToken = (token) => {
+
+};
+
 module.exports = {
     generateToken,
-    generatePayloadToken
+    generatePayloadToken,
+    validateToken,
+    decodeToken
 }
