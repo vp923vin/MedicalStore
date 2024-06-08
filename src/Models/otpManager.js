@@ -20,7 +20,7 @@ const OtpManager = sequelize.define('OtpManager', {
     allowNull: true
   },
   auth_token: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
     allowNull: false
   },
   otp_reason: {

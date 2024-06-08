@@ -11,7 +11,6 @@ const Invoice = require('../../Models/invoiceModel');
 const Inventory = require('../../Models/inventoryModel');
 const OrderStatus = require('../../Models/orderStatusModel');
 const Prescription = require('../../Models/prescriptionModel');
-const PasswordReset = require('../../Models/passwordResetModel');
 const OtpManager = require('../../Models/otpManager');
 const bcrypt = require('bcrypt');
 

@@ -40,7 +40,6 @@ const loginValidationRules = () => {
     ];
 };
 
-
 const registerValidationRules = () => {
     return [
         body('username').custom((value, { req }) => {
@@ -83,9 +82,24 @@ const registerValidationRules = () => {
     ];
 };
 
+const passwordValidationRules = () => {
+    return [
+        body('newPassword').custom(async (value, { req }) => {
+            if (!value) {
+                throw new Error('New Password is required');
+            }
+        }),
+        body('confirmPassword').custom(async (value, { req }) => {
+            if (!value) {
+                throw new Error('Confirm Password is required');
+            }
+        })
+    ]
+};
 
 module.exports = {
-    registerValidationRules, 
-    loginValidationRules, 
-    forgetPasswordValidationRules 
+    registerValidationRules,
+    loginValidationRules,
+    forgetPasswordValidationRules,
+    passwordValidationRules
 }

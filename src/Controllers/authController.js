@@ -43,12 +43,14 @@ const register = async (req, res) => {
             });
         }
         const hashedPassword = await hashPassword(password);
+        const result = await OtpManager.findOne({ where: { auth_token: email, otp_reason: 'email_verify' } });
         const user = await User.create({
             username,
             email,
             password: hashedPassword,
             phone_number: mobile,
-            role_id: customerRole.role_id
+            role_id: customerRole.role_id,
+            email_verified_at: result ? new Date() : null,
         });
 
         return res.status(201).json({
@@ -110,8 +112,134 @@ const login = async (req, res) => {
     }
 };
 
-const verifyEmail = async () => {
+const verifyEmail = async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        const formattedErrors = formatErrors(errors.array());
+        return res.status(400).json({
+            status: 'failed',
+            statusCode: 400,
+            message: "Validation Failed",
+            errors: formattedErrors,
+        });
+    }
 
+    const { email } = req.body;
+    try {
+        const otp = generateRandomNumber();
+        const otpExpiry = new Date(Date.now() + 15 * 60 * 1000); // 15 min. expiration
+        const token = await generatePayloadToken({
+            user: 'new_user',
+            user_email: email,
+            otp_reason: 'email_verify',
+            otp_expiry: otpExpiry
+        });
+
+        await OtpManager.create({
+            user_id: null,
+            otp: otp,
+            auth_token: token,
+            otp_reason: 'email_verify',
+            createdAt: new Date(),
+            expiresAt: otpExpiry
+        });
+
+        const emailTemplatePath = path.join(__dirname, '..', 'Views', 'emails', 'otpSend.ejs');
+
+        const emailTemplate = await ejs.renderFile(emailTemplatePath, {
+            name: 'user',
+            otp: otp,
+            otp_expiry: otpExpiry,
+            appName: appConfig.appName
+        });
+
+        const subject = 'Email Verification - OTP';
+        const text = `Email Verification - OTP`;
+        await sendMail(email, subject, text, emailTemplate);
+
+        return res.status(200).json({
+            status: 'success',
+            statusCode: 200,
+            message: 'Verification email sent successfully',
+            data: { 
+                token: token, 
+                otp_expiry: otpExpiry 
+            }
+        });
+    } catch (error) {
+        return res.status(500).json({
+            status: 'failed',
+            statusCode: 500,
+            message: 'Something went wrong in server.',
+            error: error.message
+        });
+    }
+};
+
+const verifyEmailOTP = async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        const formattedErrors = formatErrors(errors.array());
+        return res.status(400).json({
+            status: 'failed',
+            statusCode: 400,
+            message: "Validation Failed",
+            errors: formattedErrors,
+        });
+    }
+
+    const { otp } = req.body;
+    const authHeader = req.headers['authorization'];
+    if (!authHeader) {
+        return res.status(401).json({
+            status: 'failed',
+            statusCode: 401,
+            message: 'Unauthorized',
+            errors: [{ message: 'Unauthorized' }],
+        });
+    }
+
+    const token = authHeader.split(' ')[1];
+
+    try {
+        const decoded = await decodeToken(token);
+        const otpRecord = await OtpManager.findOne({
+            where: {
+                otp: otp,
+                auth_token: token,
+                otp_reason: 'email_verify',
+                expiresAt: { [Op.gt]: new Date() }
+            }
+        });
+
+        if (!otpRecord) {
+            return res.status(400).json({
+                status: 'failed',
+                statusCode: 400,
+                message: 'Invalid or Expired OTP ',
+                errors: [{ message: 'Invalid or Expired OTP' }]
+            });
+        }
+
+        await otpRecord.update({
+            auth_token: decoded.user_email,
+            otp: null,
+            expiresAt: null
+        });
+
+        return res.status(200).json({
+            status: 'success',
+            statusCode: 200,
+            message: 'Email verified successfully',
+        });
+    } catch (error) {
+        return res.status(500).json({
+            status: 'failed',
+            statusCode: 500,
+            message: 'Something went wrong in server.',
+            error: error.message
+        });
+    }
 };
 
 const forgetPassword = async (req, res) => {
@@ -141,7 +269,7 @@ const forgetPassword = async (req, res) => {
             });
         }
         const otp = generateRandomNumber();
-        const otpExpiry = new Date(Date.now() + 60 * 60 * 1000);
+        const otpExpiry = new Date(Date.now() + 15 * 60 * 1000);
         const token = await generatePayloadToken({
             user_id: user.user_id,
             otp_expiry: otpExpiry,
@@ -193,6 +321,17 @@ const verifyOTP = async (req, res) => {
             statusCode: 401,
             message: 'Unauthorized',
             errors: [{message: 'Unauthorized'}]
+        });
+    }
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        const formattedErrors = formatErrors(errors.array());
+        return res.status(400).json({
+            status: 'failed',
+            statusCode: 400,
+            message: "Validation Failed",
+            errors: formattedErrors,
         });
     }
 
@@ -271,7 +410,7 @@ const resendOTP = async (req, res) => {
         }
 
         const otp = generateRandomNumber();
-        const otpExpiry = new Date(Date.now() + 60 * 60 * 1000);
+        const otpExpiry = new Date(Date.now() + 15 * 60 * 1000);
         const genNewToken = await generatePayloadToken({
             user_id: user.user_id,
             otp_expiry: otpExpiry,
@@ -321,7 +460,6 @@ const resendOTP = async (req, res) => {
     }
 };
 
-
 const resetPassword = async (req, res) => {
     const authHeader = req.headers['authorization'];
     if (!authHeader) {
@@ -330,6 +468,17 @@ const resetPassword = async (req, res) => {
             statusCode: 401,
             message: 'Unauthorized',
             errors: [{message: 'Unauthorized'}]
+        });
+    }
+    
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        const formattedErrors = formatErrors(errors.array());
+        return res.status(400).json({
+            status: 'failed',
+            statusCode: 400,
+            message: "Validation Failed",
+            errors: formattedErrors,
         });
     }
 
@@ -376,7 +525,6 @@ const resetPassword = async (req, res) => {
 
         const hashedPassword = await hashPassword(newPassword);
         await User.update({ password: hashedPassword }, { where: { user_id: decoded.user_id } });
-
         return res.status(200).json({
             status: 'success',
             statusCode: 200,
@@ -392,7 +540,6 @@ const resetPassword = async (req, res) => {
     }
 };
 
-
 const logout = async (req, res) => { 
 
 };
@@ -401,6 +548,7 @@ module.exports = {
     register,
     login,
     verifyEmail,
+    verifyEmailOTP,
     forgetPassword,
     verifyOTP,
     resendOTP,
