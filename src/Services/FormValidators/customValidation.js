@@ -13,7 +13,7 @@ const emailValidatorRules = () => {
             }
             const existingUser = await User.findOne({ where: { email: value } });
             if (existingUser) {
-                throw new Error('User Exists, Use different email');
+                throw new Error('Email Exists, Use different Email');
             }
             return true;
         })
