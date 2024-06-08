@@ -30,7 +30,14 @@ const validateToken = (token) => {
 };
 
 const decodeToken = (token) => {
-
+    try {
+        const detoken = jwt.verify(token, secretKey);
+        console.log(detoken);
+        return detoken;
+    } catch (error) {
+        console.error('Error generating token:', error);
+        throw error;
+    }
 };
 
 module.exports = {

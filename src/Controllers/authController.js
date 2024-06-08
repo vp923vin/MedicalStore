@@ -1,5 +1,6 @@
 const ejs = require('ejs');
 const path = require('path');
+const { Op } = require('sequelize');
 const { validationResult } = require('express-validator');
 
 const User = require('../Models/userModel');
@@ -7,7 +8,7 @@ const Role = require('../Models/userRoleModel');
 const OtpManager = require('../Models/otpManager');
 
 const { appConfig } = require('../Configs/app');
-const { generateToken, generatePayloadToken } = require('../Services/Utils/jwtToken');
+const { generateToken, generatePayloadToken, decodeToken } = require('../Services/Utils/jwtToken');
 const { hashPassword, comparePassword } = require('../Services/Utils/hashPasswordService');
 const formatErrors = require('../Services/Utils/formErrorFormat');
 const { sendMail } = require('../Services/Utils/mailService');
@@ -199,7 +200,7 @@ const verifyOTP = async (req, res) => {
     const { otp } = req.body;
 
     try {
-        const decoded = await jwt.verify(token, appConfig.jwtSecret);
+        const decoded = await decodeToken(token);
         const otpEntry = await OtpManager.findOne({
             where: {
                 user_id: decoded.user_id,
@@ -232,6 +233,7 @@ const verifyOTP = async (req, res) => {
             status: 'success',
             statusCode: 200,
             message: 'OTP verified successfully',
+            data: { token: genNewToken }
         });
     } catch (error) {
         return res.status(500).json({
@@ -257,7 +259,7 @@ const resendOTP = async (req, res) => {
     const token = authHeader.split(' ')[1];
 
     try {
-        const decoded = await jwt.verify(token, appConfig.jwtSecret);
+        const decoded = await decodeToken(token);
         const user = await User.findByPk(decoded.user_id);
         if (!user) {
             return res.status(400).json({
@@ -304,6 +306,10 @@ const resendOTP = async (req, res) => {
             status: 'success',
             statusCode: 200,
             message: 'OTP resent successfully',
+            data: { 
+                token: genNewToken, 
+                otp_expiry: otpExpiry,
+            }
         });
     } catch (error) {
         return res.status(500).json({
@@ -328,7 +334,7 @@ const resetPassword = async (req, res) => {
     }
 
     const token = authHeader.split(' ')[1];
-    const decoded = await jwt.verify(token, appConfig.jwtSecret);
+    const decoded = await decodeToken(token);
     if(decoded.otp_expiry != 'Expired'){
         return res.status(400).json({
             status: 'failed',
