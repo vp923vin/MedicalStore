@@ -81,17 +81,35 @@ const login = async (req, res) => {
     }
     const { email, password } = req.body;
     try {
-        const user = await User.findOne({ where: { email } });
-        const passCompare = await comparePassword(password, user.password)
-        if (!user || !passCompare) {
+        const user = await User.scope('withPassword').findOne({ where: { email } });
+        if (!user) {
             return res.status(400).json({
                 status: 'failed',
                 statusCode: 400,
                 message: 'Validation Failed',
                 errors: [
-                    {
-                        message: 'Invalid email or password'
-                    }
+                    { message: 'Invalid email or password' }
+                ]
+            });
+        }
+        const passCompare = await comparePassword(password, user.password);
+        if (!passCompare) {
+            return res.status(400).json({
+                status: 'failed',
+                statusCode: 400,
+                message: 'Validation Failed',
+                errors: [
+                    { message: 'Invalid email or password' }
+                ]
+            });
+        }
+        if(user.is_active !== 'active'){
+            return res.status(400).json({
+                status: 'failed',
+                statusCode: 400,
+                message: 'Account is not active',
+                errors: [
+                    { message: 'Account is not active' }
                 ]
             });
         }
@@ -103,6 +121,7 @@ const login = async (req, res) => {
             data: { token: token },
         });
     } catch (error) {
+        console.error('Error in login function:', error);
         return res.status(500).json({
             status: 'failed',
             statusCode: 500,

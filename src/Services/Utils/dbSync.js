@@ -53,25 +53,25 @@ const predefinedUsers = async () => {
             {
                 username: 'adminUser',
                 password: await bcrypt.hash('12345678', 10),
-                email: 'admin@example.com',
+                email: 'admin@gmail.com',
                 role_id: roleMap['admin']
             },
             {
                 username: 'managerUser',
                 password: await bcrypt.hash('12345678', 10),
-                email: 'manager@example.com',
+                email: 'manager@gmail.com',
                 role_id: roleMap['manager']
             },
             {
                 username: 'customerUser',
                 password: await bcrypt.hash('12345678', 10),
-                email: 'customer@example.com',
+                email: 'customer@gmail.com',
                 role_id: roleMap['customer']
             },
             {
                 username: 'deliveryBoyUser',
                 password: await bcrypt.hash('12345678', 10),
-                email: 'deliveryBoy@example.com',
+                email: 'deliveryBoy@gmail.com',
                 role_id: roleMap['deliveryBoy']
             }
         ];

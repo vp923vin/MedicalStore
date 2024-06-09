@@ -17,6 +17,17 @@ const createRole = async (req, res) => {
     }
     const { role_name } = req.body;
     try {
+        const existingRole = await Role.findOne({ where: { role_name } });
+        if (existingRole) {
+            return res.status(400).json({
+                status: 'failed',
+                statusCode: 400,
+                message: 'Role already exists',
+                errors: [
+                    { message: 'Role with this name already exists' }
+                ]
+            });
+        }
         const role = await Role.create({ role_name });
         return res.status(201).json({
             status: 'success',
@@ -76,6 +87,16 @@ const updateRole = async (req, res) => {
                 errors: [{
                     message: "Role Not Found"
                 }],
+            });
+        }
+        if (role.role_name === role_name) {
+            return res.status(400).json({
+                status: 'failed',
+                statusCode: 400,
+                message: 'Role already exists',
+                errors: [
+                    { message: 'Role with this name already exists' }
+                ]
             });
         }
         await role.update({ role_name });
@@ -160,7 +181,7 @@ const getUserProfile = async (req, res) => {
             return res.status(404).json({
                 status: 'failed',
                 statusCode: 404,
-                message: "Unable to fetch",
+                message: "Unable to found",
                 errors: [{
                     message: "User not found"
                 }],
@@ -190,7 +211,7 @@ const updateUserProfile = async (req, res) => {
             return res.status(404).json({
                 status: 'failed',
                 statusCode: 404,
-                message: "Unable to fetch",
+                message: "Unable to found",
                 errors: [{
                     message: "User not found"
                 }],

@@ -37,7 +37,7 @@ Task Description:
     but can update from admin end.
     #### status: completed.
 
-  #### Date: 
+  #### Date: 09/06/2024
   - Now authenticate routes and moves next utill modify the above tasks small small changes done.
   #### status: completed.
   #### Note:  
