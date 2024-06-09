@@ -40,6 +40,44 @@ Task Description:
   #### Date: 09/06/2024
   - Now authenticate routes and moves next utill modify the above tasks small small changes done.
   #### status: completed.
+
+  #### Date: 
+  - category crud and product crud.
+  #### status: pending.
+
+  #### Date: 
+  - prescription crud. before order or on order create.
+  #### status: pending.
+   
+  #### Date: 
+  - inventory crud and order, order item crud.
+  #### status: pending.
+
+  #### Date: 
+  - payment crud and order status update.
+  #### status: pending.
+
+  #### Date: 
+  - order tracking crud.
+  #### status: pending.
+
+  #### Date: 
+  - Finishing backend of the application.
+  #### status: pending.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   #### Note:  
       thats it todays tasks.
       finish these taks todays.
