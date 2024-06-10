@@ -11,6 +11,14 @@ const {
     updateUserProfile, 
     deleteUserProfile 
 } = require('../Controllers/adminController');
+
+const {
+    createCategory,
+    getCategories,
+    updateCategory,
+    deleteCategory,
+} = require('../Controllers/categoryController');
+
 const authMiddleware = require('../Middlewares/authMiddleware');
 const roleMiddleware = require('../Middlewares/roleMiddleware');
 
@@ -29,5 +37,10 @@ router.get('/all-user', authMiddleware, roleMiddleware('admin'), listAllUsers);
 router.get('/fetch-user/:userId', authMiddleware, roleMiddleware('admin'),  getUserProfile);
 router.put('/update-user/:userId', authMiddleware, roleMiddleware('admin'), updateUserProfile);
 router.delete('/delete-user/:userId', authMiddleware, roleMiddleware('admin'), deleteUserProfile);
+router.post('/create-category', createCategory);
+router.get('/all-category', getCategories);
+router.get('/single-category/:categoryId', getCategories);
+router.put('/updaate-category/:categoryId', updateCategory);
+router.delete('/delete-category/:categoryId', deleteCategory);
 
 module.exports = router;
