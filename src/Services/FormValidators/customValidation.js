@@ -35,7 +35,20 @@ const otpValidatorRules = () => {
     
 };
 
+const categoryValidatorRules = () => {
+    return [
+        body('category_name').custom(async (value, { req }) => {
+            if (!value) {
+                throw new Error('category name is required');
+            }
+            
+            return true;
+        })
+    ]
+};
+
 module.exports = {
     emailValidatorRules,
-    otpValidatorRules
+    otpValidatorRules,
+    categoryValidatorRules
 };

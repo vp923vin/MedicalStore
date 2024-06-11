@@ -45,6 +45,36 @@ const createRole = async (req, res) => {
     }
 };
 
+const getRoleById = async (req, res) => {
+    const { roleId } = req.params;
+    try {
+        const roles = await Role.findOne({wehre: { role_id: roleId }});
+        if (!roles) {
+            return res.status(404).json({
+                status: 'failed',
+                statusCode: 404,
+                message: "Unable to update",
+                errors: [{
+                    message: "Role Not Found"
+                }],
+            });
+        }
+        return res.status(200).json({
+            status: 'success',
+            statusCode: 200,
+            message: 'Role get successfully',
+            data: { role: roles },
+        });
+    } catch (error) {
+        return res.status(500).json({
+            status: 'failed',
+            statusCode: 500,
+            message: 'Something went wrong in server.',
+            error: error.message
+        });
+    }
+};
+
 const getRoles = async (req, res) => {
     try {
         const roles = await Role.findAll();
@@ -269,6 +299,7 @@ const deleteUserProfile = async (req, res) => {
 module.exports = {
     createRole,
     getRoles,
+    getRoleById,
     updateRole,
     deleteRole,
     listAllUsers,
