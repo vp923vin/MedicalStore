@@ -3,6 +3,8 @@ const express = require('express');
 const { roleValidationRules } = require('../Services/FormValidators/roleValidation');
 const { categoryValidatorRules } = require('../Services/FormValidators/customValidation');
 const { productValidationRules } = require('../Services/FormValidators/productValidation');
+const { inventoryValidationRules } = require('../Services/FormValidators/inventoryValidation');
+
 const { 
     createRole, 
     getRoles,
@@ -30,6 +32,15 @@ const {
     updateProduct,
     deleteProduct,
 } = require('../Controllers/productController');
+
+const {
+    createInventory,
+    getInventorieById,
+    updateInventory,
+    deleteInventory,
+    updateLastRestocked,
+    updateLastSold
+} = require('../Controllers/inventoryController');
 
 const authMiddleware = require('../Middlewares/authMiddleware');
 const roleMiddleware = require('../Middlewares/roleMiddleware');
@@ -68,5 +79,15 @@ router.get('/all-products', authMiddleware, roleMiddleware('admin'), getProducts
 router.get('/single-product/:productId', authMiddleware, roleMiddleware('admin'), getProductById);  
 router.put('/update-product/:productId', authMiddleware, roleMiddleware('admin'), updateProduct);  
 router.delete('/delete-product/:productId', authMiddleware, roleMiddleware('admin'), deleteProduct);  
+
+// products
+router.post('/create-inventory', upload.single('product_image'), inventoryValidationRules(), authMiddleware, roleMiddleware('admin'), createInventory); 
+router.get('/inventory/:inventoryId', authMiddleware, roleMiddleware('admin'), getInventorieById);  
+router.put('/update-inventory/:inventoryId', inventoryValidationRules(), authMiddleware, roleMiddleware('admin'), updateInventory);  
+router.put('/update-inventory/last-restocked/:inventoryId', authMiddleware, roleMiddleware('admin'), updateLastRestocked);  
+router.put('/update-inventory/last-sold-out/:inventoryId', authMiddleware, roleMiddleware('admin'), updateLastSold);  
+router.delete('/delete-inventory/:inventoryId', authMiddleware, roleMiddleware('admin'), deleteInventory);  
+
+//
 
 module.exports = router;

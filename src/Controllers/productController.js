@@ -61,6 +61,14 @@ const getProducts = async (req, res) => {
         const products = await Product.findAll({
             include: [{ model: Category, as: 'Category' }],
         });
+        if (!products) {
+            return res.status(200).json({
+                status: 'success',
+                statusCode: 200,
+                message: 'No products in the Record Book',
+                data: [],
+            });
+        }
         return res.status(200).json({
             status: 'success',
             statusCode: 200,
