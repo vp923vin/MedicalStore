@@ -167,6 +167,7 @@ const deleteCategory = async (req, res) => {
                 status: 'failed',
                 statusCode: 404,
                 message: 'Category not found',
+                errors: [{message: 'Category not found'}]
             });
         }
         await category.destroy();

@@ -2,6 +2,7 @@ const express = require('express');
 
 const { roleValidationRules } = require('../Services/FormValidators/roleValidation');
 const { categoryValidatorRules } = require('../Services/FormValidators/customValidation');
+const { productValidationRules } = require('../Services/FormValidators/productValidation');
 const { 
     createRole, 
     getRoles,
@@ -22,8 +23,17 @@ const {
     deleteCategory,
 } = require('../Controllers/categoryController');
 
+const {
+    createProduct,
+    getProducts,
+    getProductById,
+    updateProduct,
+    deleteProduct,
+} = require('../Controllers/productController');
+
 const authMiddleware = require('../Middlewares/authMiddleware');
 const roleMiddleware = require('../Middlewares/roleMiddleware');
+const upload = require('../Services/Utils/imageUpload');
 
 const router = express.Router();
 
@@ -53,6 +63,10 @@ router.put('/update-category/:categoryId', authMiddleware, roleMiddleware('admin
 router.delete('/delete-category/:categoryId', authMiddleware, roleMiddleware('admin'), deleteCategory);
 
 // products
-
+router.post('/create-product', upload.single('product_image'), productValidationRules(), authMiddleware, roleMiddleware('admin'), createProduct); 
+router.get('/all-products', authMiddleware, roleMiddleware('admin'), getProducts);  
+router.get('/single-product/:productId', authMiddleware, roleMiddleware('admin'), getProductById);  
+router.put('/update-product/:productId', authMiddleware, roleMiddleware('admin'), updateProduct);  
+router.delete('/delete-product/:productId', authMiddleware, roleMiddleware('admin'), deleteProduct);  
 
 module.exports = router;
