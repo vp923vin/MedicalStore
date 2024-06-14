@@ -2,6 +2,7 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../Configs/db');
 const User = require('./userModel');
 const DeliveryOption = require('./deliveryOptionModel');
+const OrderStatus = require('./orderStatusModel');
 
 const Order = sequelize.define('Order', {
     order_id: {
@@ -24,9 +25,12 @@ const Order = sequelize.define('Order', {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW
     },
-    status: {
+    status_id: {
         type: DataTypes.STRING,
-        allowNull: false
+        references: {
+            model: 'order_status',
+            key: 'status_id'
+        },
     },
     delivery_option_id: {
         type: DataTypes.INTEGER,
@@ -55,6 +59,9 @@ const Order = sequelize.define('Order', {
 // Associations
 Order.belongsTo(User, { foreignKey: 'user_id' });
 User.hasMany(Order, { foreignKey: 'user_id' });
+
+// Order.belongsTo(OrderStatus, { foreignKey: 'status_id' });
+// OrderStatus.hasMany(Order, { foreignKey: 'status_id' });
 
 Order.belongsTo(DeliveryOption, { foreignKey: 'delivery_option_id' });
 DeliveryOption.hasMany(Order, { foreignKey: 'delivery_option_id' });

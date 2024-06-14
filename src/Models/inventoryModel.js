@@ -54,8 +54,8 @@ const Inventory = sequelize.define('Inventory', {
 });
 
 // Associations
-Inventory.belongsTo(Product, { foreignKey: 'product_id' });
-Product.hasMany(Inventory, { foreignKey: 'product_id' });
+Inventory.belongsTo(Product, { foreignKey: 'product_id', as: 'product' });
+Product.hasMany(Inventory, { foreignKey: 'product_id', as: 'inventory' });
 
 module.exports = Inventory;
 

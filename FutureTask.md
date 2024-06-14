@@ -41,15 +41,15 @@ Task Description:
   - Now authenticate routes and moves next utill modify the above tasks small small changes done.
   #### status: completed.
 
-  #### Date: 
+  #### Date: 12/06/2024
   - category crud and product crud.
-  #### status: pending.
+  #### status: completed.
 
   #### Date: 
   - prescription crud. before order or on order create.
   #### status: pending.
    
-  #### Date: 
+  #### Date: 12/06/2024
   - inventory crud and order, order item crud.
   #### status: pending.
 
