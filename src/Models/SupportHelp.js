@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
-  const OTPManager = sequelize.define('OTPManager', {
-    otp_id: {
+  const SupportHelp = sequelize.define('SupportHelp', {
+    support_help_id: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true
@@ -9,29 +9,17 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false
     },
-    email_verify_otp: {
+    subject: {
       type: DataTypes.STRING,
-      allowNull: true
+      allowNull: false
     },
-    mobile_verify_otp: {
-      type: DataTypes.STRING,
-      allowNull: true
+    description: {
+      type: DataTypes.TEXT,
+      allowNull: false
     },
-    password_reset_otp: {
-      type: DataTypes.STRING,
-      allowNull: true
-    },
-    order_receive_otp: {
-      type: DataTypes.STRING,
-      allowNull: true
-    },
-    order_verify_otp: {
-      type: DataTypes.STRING,
-      allowNull: true
-    },
-    others_otp: {
-      type: DataTypes.STRING,
-      allowNull: true
+    status: {
+      type: DataTypes.ENUM('open', 'closed', 'working', 'pending', 'failed', 'rejected'),
+      allowNull: false
     },
     createdAt: {
       type: DataTypes.DATE,
@@ -48,10 +36,10 @@ module.exports = (sequelize, DataTypes) => {
       field: 'deleted_at'
     }
   }, {
-    tableName: 'otp_managers',
+    tableName: 'support_help',
     timestamps: true,
     paranoid: true
   });
 
-  return OTPManager;
+  return SupportHelp;
 };

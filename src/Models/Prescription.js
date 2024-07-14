@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
-  const OTPManager = sequelize.define('OTPManager', {
-    otp_id: {
+  const Prescription = sequelize.define('Prescription', {
+    prescription_id: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true
@@ -9,29 +9,13 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false
     },
-    email_verify_otp: {
-      type: DataTypes.STRING,
-      allowNull: true
+    order_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false
     },
-    mobile_verify_otp: {
+    prescription_image_url: {
       type: DataTypes.STRING,
-      allowNull: true
-    },
-    password_reset_otp: {
-      type: DataTypes.STRING,
-      allowNull: true
-    },
-    order_receive_otp: {
-      type: DataTypes.STRING,
-      allowNull: true
-    },
-    order_verify_otp: {
-      type: DataTypes.STRING,
-      allowNull: true
-    },
-    others_otp: {
-      type: DataTypes.STRING,
-      allowNull: true
+      allowNull: false
     },
     createdAt: {
       type: DataTypes.DATE,
@@ -48,10 +32,10 @@ module.exports = (sequelize, DataTypes) => {
       field: 'deleted_at'
     }
   }, {
-    tableName: 'otp_managers',
+    tableName: 'prescriptions',
     timestamps: true,
     paranoid: true
   });
 
-  return OTPManager;
+  return Prescription;
 };

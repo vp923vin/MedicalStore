@@ -1,6 +1,6 @@
 const { body } = require('express-validator');
 const validator = require('validator');
-const Role = require('../../Models/userRoleModel');
+const Role = require('../../Models/User');
 
 
 const roleValidationRules = () => {

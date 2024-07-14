@@ -1,37 +1,37 @@
+const sequelize = require('../Configs/db');
+
 module.exports = (sequelize, DataTypes) => {
-  const OTPManager = sequelize.define('OTPManager', {
-    otp_id: {
+  const User = sequelize.define('User', {
+    user_id: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true
     },
-    user_id: {
-      type: DataTypes.INTEGER,
+    fullname: {
+      type: DataTypes.STRING,
       allowNull: false
     },
-    email_verify_otp: {
+    username: {
       type: DataTypes.STRING,
-      allowNull: true
+      allowNull: false,
+      unique: true
     },
-    mobile_verify_otp: {
+    email: {
       type: DataTypes.STRING,
-      allowNull: true
+      allowNull: false,
+      unique: true
     },
-    password_reset_otp: {
+    password: {
       type: DataTypes.STRING,
-      allowNull: true
+      allowNull: false
     },
-    order_receive_otp: {
+    phone: {
       type: DataTypes.STRING,
-      allowNull: true
+      allowNull: false
     },
-    order_verify_otp: {
-      type: DataTypes.STRING,
-      allowNull: true
-    },
-    others_otp: {
-      type: DataTypes.STRING,
-      allowNull: true
+    role_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false
     },
     createdAt: {
       type: DataTypes.DATE,
@@ -48,10 +48,10 @@ module.exports = (sequelize, DataTypes) => {
       field: 'deleted_at'
     }
   }, {
-    tableName: 'otp_managers',
+    tableName: 'users',
     timestamps: true,
     paranoid: true
   });
 
-  return OTPManager;
+  return User;
 };

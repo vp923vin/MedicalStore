@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
-  const OTPManager = sequelize.define('OTPManager', {
-    otp_id: {
+  const PasswordReset = sequelize.define('PasswordReset', {
+    reset_id: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true
@@ -9,29 +9,13 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false
     },
-    email_verify_otp: {
+    reset_token: {
       type: DataTypes.STRING,
-      allowNull: true
+      allowNull: false
     },
-    mobile_verify_otp: {
-      type: DataTypes.STRING,
-      allowNull: true
-    },
-    password_reset_otp: {
-      type: DataTypes.STRING,
-      allowNull: true
-    },
-    order_receive_otp: {
-      type: DataTypes.STRING,
-      allowNull: true
-    },
-    order_verify_otp: {
-      type: DataTypes.STRING,
-      allowNull: true
-    },
-    others_otp: {
-      type: DataTypes.STRING,
-      allowNull: true
+    expires_at: {
+      type: DataTypes.DATE,
+      allowNull: false
     },
     createdAt: {
       type: DataTypes.DATE,
@@ -48,10 +32,10 @@ module.exports = (sequelize, DataTypes) => {
       field: 'deleted_at'
     }
   }, {
-    tableName: 'otp_managers',
+    tableName: 'password_resets',
     timestamps: true,
     paranoid: true
   });
 
-  return OTPManager;
+  return PasswordReset;
 };

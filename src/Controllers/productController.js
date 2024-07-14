@@ -2,8 +2,8 @@ const multer = require('multer');
 const path = require('path');
 const { validationResult } = require('express-validator');
 
-const Product = require('../Models/productModel');
-const Category = require('../Models/categoryModel');
+const Product = require('../Models/Product');
+const Category = require('../Models/Category');
 
 const formatErrors = require('../Services/Utils/formErrorFormat');
 const upload = require('../Services/Utils/imageUpload');

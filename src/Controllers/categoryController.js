@@ -1,4 +1,4 @@
-const Category = require('../Models/categoryModel');
+const Category = require('../Models/Category');
 const { validationResult } = require('express-validator');
 const formatErrors = require('../Services/Utils/formErrorFormat');
 

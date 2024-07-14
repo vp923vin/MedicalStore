@@ -1,6 +1,6 @@
 const { validationResult } = require('express-validator');
-const Inventory = require('../Models/inventoryModel');
-const Product = require('../Models/productModel');
+const Inventory = require('../Models/Inventory');
+const Product = require('../Models/Product');
 const formatErrors = require('../Services/Utils/formErrorFormat');
 
 const createInventory = async (req, res) => {

@@ -1,36 +1,24 @@
 module.exports = (sequelize, DataTypes) => {
-  const OTPManager = sequelize.define('OTPManager', {
-    otp_id: {
+  const OrderShipping = sequelize.define('OrderShipping', {
+    shipping_id: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true
     },
-    user_id: {
+    order_id: {
       type: DataTypes.INTEGER,
       allowNull: false
     },
-    email_verify_otp: {
+    user_delivery_address_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    tracking_number: {
       type: DataTypes.STRING,
       allowNull: true
     },
-    mobile_verify_otp: {
-      type: DataTypes.STRING,
-      allowNull: true
-    },
-    password_reset_otp: {
-      type: DataTypes.STRING,
-      allowNull: true
-    },
-    order_receive_otp: {
-      type: DataTypes.STRING,
-      allowNull: true
-    },
-    order_verify_otp: {
-      type: DataTypes.STRING,
-      allowNull: true
-    },
-    others_otp: {
-      type: DataTypes.STRING,
+    shipping_date: {
+      type: DataTypes.DATE,
       allowNull: true
     },
     createdAt: {
@@ -48,10 +36,10 @@ module.exports = (sequelize, DataTypes) => {
       field: 'deleted_at'
     }
   }, {
-    tableName: 'otp_managers',
+    tableName: 'order_shipping',
     timestamps: true,
     paranoid: true
   });
 
-  return OTPManager;
+  return OrderShipping;
 };

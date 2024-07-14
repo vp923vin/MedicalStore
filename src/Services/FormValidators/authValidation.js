@@ -1,6 +1,6 @@
 const { body } = require('express-validator');
 const validator = require('validator');
-const User = require('../../Models/userModel');
+const User = require('../../Models/User');
 
 const forgetPasswordValidationRules = () => {
     return [

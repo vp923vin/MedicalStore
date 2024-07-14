@@ -3,9 +3,9 @@ const path = require('path');
 const { Op } = require('sequelize');
 const { validationResult } = require('express-validator');
 
-const User = require('../Models/userModel');
-const Role = require('../Models/userRoleModel');
-const OtpManager = require('../Models/otpManager');
+const User = require('../Models/User');
+const Role = require('../Models/Role');
+const OtpManager = require('../Models/OTPManager');
 
 const { appConfig } = require('../Configs/app');
 const { generateToken, generatePayloadToken, decodeToken } = require('../Services/Utils/jwtToken');
