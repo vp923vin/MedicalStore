@@ -9,7 +9,15 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false
     },
-    order_id: {
+    product_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    min_quantity: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    max_quantity: {
       type: DataTypes.INTEGER,
       allowNull: false
     },

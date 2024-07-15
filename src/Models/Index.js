@@ -19,7 +19,9 @@ const PasswordReset = require('./PasswordReset')(sequelize, Sequelize.DataTypes)
 const OTPManager = require('./OTPManager')(sequelize, Sequelize.DataTypes);
 const UserPermission = require('./UserPermission')(sequelize, Sequelize.DataTypes);
 const SupportHelp = require('./SupportHelp')(sequelize, Sequelize.DataTypes);
+const SupportHelpMessages = require('./SupportHelpMessages')(sequelize, Sequelize.DataTypes);
 const UserDeliveryAddress = require('./UserDeliveryAddress')(sequelize, Sequelize.DataTypes);
+const OrderTracking = require('./OrderTracking')(sequelize, Sequelize.DataTypes);
 
 const db = {
   sequelize,
@@ -42,7 +44,9 @@ const db = {
   OTPManager,
   UserPermission,
   SupportHelp,
+  SupportHelpMessages,
   UserDeliveryAddress,
+  OrderTracking
 };
 
 module.exports = db;

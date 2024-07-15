@@ -5,17 +5,13 @@ module.exports = (sequelize, DataTypes) => {
       autoIncrement: true,
       primaryKey: true
     },
-    order_id: {
+    checkout_id: {
       type: DataTypes.INTEGER,
       allowNull: false
     },
     user_delivery_address_id: {
       type: DataTypes.INTEGER,
       allowNull: false
-    },
-    tracking_number: {
-      type: DataTypes.STRING,
-      allowNull: true
     },
     shipping_date: {
       type: DataTypes.DATE,

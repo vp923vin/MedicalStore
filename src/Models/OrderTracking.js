@@ -1,16 +1,20 @@
 module.exports = (sequelize, DataTypes) => {
-    const SubCategory = sequelize.define('SubCategory', {
-        sub_category_id: {
+    const OrderTracking = sequelize.define('OrderTracking', {
+        tracking_id: {
             type: DataTypes.INTEGER,
             autoIncrement: true,
             primaryKey: true
         },
-        name: {
-            type: DataTypes.STRING,
+        // order_id: {
+        //     type: DataTypes.INTEGER,
+        //     allowNull: false
+        // },
+        tracking_details: {
+            type: DataTypes.TEXT,
             allowNull: false
         },
-        category_id: {
-            type: DataTypes.INTEGER,
+        list_details: {
+            type: DataTypes.ARRAY,
             allowNull: false
         },
         createdAt: {
@@ -28,9 +32,10 @@ module.exports = (sequelize, DataTypes) => {
             field: 'deleted_at'
         }
     }, {
-        tableName: 'sub_categories',
+        tableName: 'order_tracking',
         timestamps: true,
         paranoid: true
     });
-    return SubCategory;
+
+    return OrderTracking;
 };

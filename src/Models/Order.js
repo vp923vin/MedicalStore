@@ -13,12 +13,12 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false
     },
-    payment_id: {
+    tracking_id: {
       type: DataTypes.INTEGER,
       allowNull: false
     },
-    order_status_id: {
-      type: DataTypes.INTEGER,
+    order_status: {
+      type: DataTypes.ENUM('paid', 'unpaid'),
       allowNull: false
     },
     total_amount: {

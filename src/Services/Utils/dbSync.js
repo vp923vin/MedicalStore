@@ -44,8 +44,8 @@ const defineAssociations = async () => {
         db.Checkout.belongsTo(db.User, { foreignKey: 'user_id' });
         db.User.hasMany(db.Checkout, { foreignKey: 'user_id' });
 
-        db.Checkout.belongsTo(db.Order, { foreignKey: 'order_id' });
-        db.Order.hasMany(db.Checkout, { foreignKey: 'order_id' });
+        db.Checkout.belongsTo(db.Product, { foreignKey: 'product_id' });
+        db.Product.hasMany(db.Checkout, { foreignKey: 'product_id' });
 
         db.Invoice.belongsTo(db.Order, { foreignKey: 'order_id' });
         db.Order.hasMany(db.Invoice, { foreignKey: 'order_id' });
@@ -70,6 +70,9 @@ const defineAssociations = async () => {
 
         db.SupportHelp.belongsTo(db.User, { foreignKey: 'user_id' });
         db.User.hasMany(db.SupportHelp, { foreignKey: 'user_id' });
+
+        db.SupportHelpMessages.belongsTo(db.SupportHelp, { foreignKey: 'support_help_id' });
+        db.SupportHelp.hasMany(db.SupportHelpMessages, { foreignKey: 'support_help_id' });
 
         db.UserDeliveryAddress.belongsTo(db.User, { foreignKey: 'user_id' });
         db.User.hasMany(db.UserDeliveryAddress, { foreignKey: 'user_id' });
