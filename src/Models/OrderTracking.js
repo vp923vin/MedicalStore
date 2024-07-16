@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false
         },
         list_details: {
-            type: DataTypes.ARRAY,
+            type: DataTypes.TEXT,
             allowNull: false
         },
         createdAt: {
