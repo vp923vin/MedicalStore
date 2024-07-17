@@ -3,7 +3,6 @@ const sequelize = require("../../Configs/db");
 const db = require("../../Models/index");
 
 // define associations
-
 const defineAssociations = async () => {
   try {
     // User Associations
