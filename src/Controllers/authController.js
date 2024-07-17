@@ -3,9 +3,7 @@ const path = require('path');
 const { Op } = require('sequelize');
 const { validationResult } = require('express-validator');
 
-const db = require('../Models/Index');
-const Role = require('../Models/Role');
-const OtpManager = require('../Models/OTPManager');
+const { User, Role, OTPManager } = require('../Models/Index');
 
 const { appConfig } = require('../Configs/app');
 const { generateToken, generatePayloadToken, decodeToken } = require('../Services/Utils/jwtToken');
@@ -43,7 +41,7 @@ const register = async (req, res) => {
             });
         }
         const hashedPassword = await hashPassword(password);
-        const result = await OtpManager.findOne({ where: { auth_token: email, otp_reason: 'email_verify' } });
+        const result = await OTPManager.findOne({ where: { auth_token: email, otp_reason: 'email_verify' } });
         const user = await User.create({
             username,
             email,
@@ -81,7 +79,7 @@ const login = async (req, res) => {
     }
     const { email, password } = req.body;
     try {
-        const user = await db.User.scope('withPassword').findOne({ where: { email } });
+        const user = await User.scope('withPassword').findOne({ where: { email } });
         if (!user) {
             return res.status(400).json({
                 status: 'failed',
@@ -154,7 +152,7 @@ const verifyEmail = async (req, res) => {
             otp_expiry: otpExpiry
         });
 
-        await OtpManager.create({
+        await OTPManager.create({
             user_id: null,
             otp: otp,
             auth_token: token,
@@ -222,7 +220,7 @@ const verifyEmailOTP = async (req, res) => {
 
     try {
         const decoded = await decodeToken(token);
-        const otpRecord = await OtpManager.findOne({
+        const otpRecord = await OTPManager.findOne({
             where: {
                 otp: otp,
                 auth_token: token,
@@ -294,7 +292,7 @@ const forgetPassword = async (req, res) => {
             otp_expiry: otpExpiry,
             otp_reason: 'password_reset',
         });
-        await OtpManager.create({
+        await OTPManager.create({
             user_id: user.user_id,
             otp: otp,
             auth_token: token,
@@ -359,7 +357,7 @@ const verifyOTP = async (req, res) => {
 
     try {
         const decoded = await decodeToken(token);
-        const otpEntry = await OtpManager.findOne({
+        const otpEntry = await OTPManager.findOne({
             where: {
                 user_id: decoded.user_id,
                 otp: otp,
@@ -435,7 +433,7 @@ const resendOTP = async (req, res) => {
             otp_expiry: otpExpiry,
             otp_reason: 'password_reset',
         });
-        await OtpManager.update({
+        await OTPManager.update({
             otp: otp,
             auth_token: genNewToken,
             expiresAt: otpExpiry,
@@ -523,7 +521,7 @@ const resetPassword = async (req, res) => {
     }
 
     try {
-        const otpEntry = await OtpManager.findOne({
+        const otpEntry = await OTPManager.findOne({
             where: {
                 user_id: decoded.user_id,
                 otp: null,

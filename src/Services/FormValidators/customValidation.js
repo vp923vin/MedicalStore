@@ -1,6 +1,6 @@
 const { body } = require('express-validator');
 const validator = require('validator');
-const User = require('../../Models/User');
+const {User} = require('../../Models/Index');
 
 const emailValidatorRules = () => {
     return [

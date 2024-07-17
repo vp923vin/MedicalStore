@@ -1,6 +1,6 @@
 const { body } = require('express-validator');
 const validator = require('validator');
-const db = require('../../Models/Index');
+const {User } = require('../../Models/Index');
 
 const forgetPasswordValidationRules = () => {
     return [
@@ -11,7 +11,7 @@ const forgetPasswordValidationRules = () => {
             if (!validator.isEmail(value)) {
                 throw new Error('Invalid email format');
             }
-            const existingUser = await db.User.findOne({ where: { email: value } });
+            const existingUser = await User.findOne({ where: { email: value } });
             if (!existingUser) {
                 throw new Error('User Not Exists');
             }
@@ -29,7 +29,7 @@ const loginValidationRules = () => {
             if (!validator.isEmail(value)) {
                 throw new Error('Invalid email format');
             }
-            const existingUser = await db.User.findOne({ where: { email: value } });
+            const existingUser = await User.findOne({ where: { email: value } });
             if (!existingUser) {
                 throw new Error('Invalid email or Password');
             }
