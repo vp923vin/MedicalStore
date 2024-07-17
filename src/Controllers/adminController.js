@@ -1,6 +1,5 @@
 const { validationResult } = require('express-validator');
-const User = require('../Models/User');
-const Role = require('../Models/Role');
+const {User, Role} = require('../Models/Index');
 const formatErrors = require('../Services/Utils/formErrorFormat');
 
 // roles defined 
