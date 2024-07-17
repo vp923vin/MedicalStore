@@ -36,15 +36,15 @@ module.exports = (sequelize, DataTypes) => {
     is_active: {
       type: DataTypes.ENUM('active', 'inactive'),
       allowNull: false,
-      default: 'inactive',
+      defaultValue: 'inactive',
     },
     email_verified: {
       type: DataTypes.DATE,
-      allowNull: false,
+      allowNull: true,
     },
     phone_verified: {
       type: DataTypes.DATE,
-      allowNull: false,
+      allowNull: true,
     },
     createdAt: {
       type: DataTypes.DATE,
@@ -58,6 +58,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     deletedAt: {
       type: DataTypes.DATE,
+      allowNull: true,
       field: 'deleted_at'
     }
   }, {

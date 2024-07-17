@@ -9,6 +9,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false
     },
+    // role_id: {
+    //   type: DataTypes.INTEGER,
+    //   allowNull: false
+    // },
     permission_type: {
       type: DataTypes.STRING,
       allowNull: false

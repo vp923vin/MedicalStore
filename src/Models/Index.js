@@ -13,7 +13,7 @@ const OrderShipping = require('./OrderShipping')(sequelize, Sequelize.DataTypes)
 const Wishlist = require('./Wishlist')(sequelize, Sequelize.DataTypes);
 const Checkout = require('./Checkout')(sequelize, Sequelize.DataTypes);
 const Invoice = require('./Invoice')(sequelize, Sequelize.DataTypes);
-const OrderItem = require('./OrderItem')(sequelize, Sequelize.DataTypes);
+// const OrderItem = require('./OrderItem')(sequelize, Sequelize.DataTypes);
 const Prescription = require('./Prescription')(sequelize, Sequelize.DataTypes);
 const PasswordReset = require('./PasswordReset')(sequelize, Sequelize.DataTypes);
 const OTPManager = require('./OTPManager')(sequelize, Sequelize.DataTypes);
@@ -38,7 +38,7 @@ const db = {
   Wishlist,
   Checkout,
   Invoice,
-  OrderItem,
+  // OrderItem,
   Prescription,
   PasswordReset,
   OTPManager,
