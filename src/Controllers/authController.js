@@ -3,7 +3,7 @@ const path = require('path');
 const { Op } = require('sequelize');
 const { validationResult } = require('express-validator');
 
-const User = require('../Models/User');
+const db = require('../Models/Index');
 const Role = require('../Models/Role');
 const OtpManager = require('../Models/OTPManager');
 
@@ -81,7 +81,7 @@ const login = async (req, res) => {
     }
     const { email, password } = req.body;
     try {
-        const user = await User.scope('withPassword').findOne({ where: { email } });
+        const user = await db.User.scope('withPassword').findOne({ where: { email } });
         if (!user) {
             return res.status(400).json({
                 status: 'failed',

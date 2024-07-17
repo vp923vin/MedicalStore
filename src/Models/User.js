@@ -64,7 +64,17 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     tableName: 'users',
     timestamps: true,
-    paranoid: true
+    paranoid: true,
+    defaultScope: {
+      // Exclude password by default
+      attributes: { exclude: ['password'] },
+    },
+    scopes: {
+      // Define a scope to include the password
+      withPassword: {
+        attributes: { include: ['password'] }
+      }
+    }
   });
 
   return User;

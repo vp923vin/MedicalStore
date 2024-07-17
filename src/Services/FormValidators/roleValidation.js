@@ -1,7 +1,6 @@
 const { body } = require('express-validator');
-const validator = require('validator');
-const Role = require('../../Models/User');
-
+// const validator = require('validator');
+// const Role = require('../../Models/User');
 
 const roleValidationRules = () => {
     return [
@@ -13,7 +12,6 @@ const roleValidationRules = () => {
         })
     ];
 };
-
 
 module.exports = { 
     roleValidationRules 

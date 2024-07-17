@@ -23,7 +23,7 @@ const SupportHelpMessages = require('./SupportHelpMessages')(sequelize, Sequeliz
 const UserDeliveryAddress = require('./UserDeliveryAddress')(sequelize, Sequelize.DataTypes);
 const OrderTracking = require('./OrderTracking')(sequelize, Sequelize.DataTypes);
 
-const db = {
+module.exports = {
   sequelize,
   Sequelize,
   User,
@@ -49,4 +49,4 @@ const db = {
   OrderTracking
 };
 
-module.exports = db;
+

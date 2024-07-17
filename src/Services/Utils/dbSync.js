@@ -1,99 +1,109 @@
 const bcrypt = require("bcrypt");
 const sequelize = require("../../Configs/db");
-const db = require("../../Models/index");
+const {
+  Sequelize,
+  User,
+  Role,
+  Product,
+  Category,
+  SubCategory,
+  Order,
+  Payment,
+  Inventory,
+  OrderShipping,
+  Wishlist,
+  Checkout,
+  Invoice,
+  // OrderItem,
+  Prescription,
+  PasswordReset,
+  OTPManager,
+  UserPermission,
+  SupportHelp,
+  SupportHelpMessages,
+  UserDeliveryAddress,
+  OrderTracking
+} = require("../../Models/Index");
 
 // define associations
-const defineAssociations = async () => {
+const defineAssociations = () => {
   try {
-    // User Associations
-    db.User.belongsTo(db.Role, { foreignKey: "role_id" });
-    db.User.hasMany(db.Wishlist, { foreignKey: "user_id" });
-    db.User.hasMany(db.Order, { foreignKey: "user_id" });
-    db.User.hasMany(db.UserDeliveryAddress, { foreignKey: "user_id" });
-    db.User.hasMany(db.SupportHelp, { foreignKey: "user_id" });
-    db.User.hasMany(db.PasswordReset, { foreignKey: "user_id" });
-    db.User.hasMany(db.OTPManager, { foreignKey: "user_id" });
-    db.User.belongsToMany(db.Role, {
-      through: db.UserPermission,
-      foreignKey: "user_id",
-    });
+    // User associations
+  User.belongsTo(Role, { foreignKey: 'role_id' });
+  Role.hasMany(User, { foreignKey: 'role_id' });
 
-    // Role Associations
-    db.Role.hasMany(db.User, { foreignKey: "role_id" });
-    db.Role.belongsToMany(db.User, {
-      through: db.UserPermission,
-      foreignKey: "role_id",
-    });
+  // Product associations
+  Product.belongsTo(Category, { foreignKey: 'category_id' });
+  Category.hasMany(Product, { foreignKey: 'category_id' });
 
-    // Product Associations
-    db.Product.belongsTo(db.Category, { foreignKey: "category_id" });
-    db.Product.belongsTo(db.SubCategory, { foreignKey: "sub_category_id" });
-    db.Product.hasOne(db.Inventory, { foreignKey: "product_id" });
-    db.Product.hasMany(db.Checkout, { foreignKey: "product_id" });
-    db.Product.hasMany(db.OrderItem, { foreignKey: "product_id" });
+  Product.belongsTo(SubCategory, { foreignKey: 'sub_category_id' });
+  SubCategory.hasMany(Product, { foreignKey: 'sub_category_id' });
 
-    // Order Associations
-    db.Order.belongsTo(db.User, { foreignKey: "user_id" });
-    db.Order.belongsTo(db.OrderShipping, { foreignKey: "shipping_id" }); // One-to-One
-    db.Order.belongsTo(db.Payment, { foreignKey: "payment_id" });
-    // Optional: Consider adding a belongsTo association with OrderStatus model (if it exists)
-    db.Order.hasMany(db.OrderItem, { foreignKey: "order_id" });
-    db.Order.hasOne(db.Invoice, { foreignKey: "order_id" });
+  Product.hasOne(Inventory, { foreignKey: 'product_id' });
+  Inventory.belongsTo(Product, { foreignKey: 'product_id' });
 
-    // OrderShipping Associations
-    db.OrderShipping.belongsTo(db.UserDeliveryAddress, {
-      foreignKey: "user_delivery_address_id",
-    });
+  // Order associations
+  Order.belongsTo(User, { foreignKey: 'user_id' });
+  User.hasMany(Order, { foreignKey: 'user_id' });
 
-    // Wishlist Associations
-    db.Wishlist.belongsTo(db.User, { foreignKey: "user_id" });
-    db.Wishlist.belongsTo(db.Product, { foreignKey: "product_id" });
+  Order.hasMany(Payment, { foreignKey: 'order_id' });
+  Payment.belongsTo(Order, { foreignKey: 'order_id' });
 
-    // Checkout Associations
-    db.Checkout.belongsTo(db.User, { foreignKey: "user_id" });
-    db.Checkout.belongsTo(db.Product, { foreignKey: "product_id" });
+  Order.hasOne(OrderShipping, { foreignKey: 'order_id' });
+  OrderShipping.belongsTo(Order, { foreignKey: 'order_id' });
 
-    // Invoice Associations
-    db.Invoice.belongsTo(db.Order, { foreignKey: "order_id" });
+  Order.hasOne(OrderTracking, { foreignKey: 'order_id' });
+  OrderTracking.belongsTo(Order, { foreignKey: 'order_id' });
 
-    // OrderItem Associations
-    db.OrderItem.belongsTo(db.Order, { foreignKey: "order_id" });
-    db.OrderItem.belongsTo(db.Product, { foreignKey: "product_id" });
+  Order.hasOne(Prescription, { foreignKey: 'order_id' });
+  Prescription.belongsTo(Order, { foreignKey: 'order_id' });
 
-    // Prescription Associations
-    db.Prescription.belongsTo(db.User, { foreignKey: "user_id" });
-    db.Prescription.belongsTo(db.Order, { foreignKey: "order_id" }); // Optional association
+  Order.hasOne(Invoice, { foreignKey: 'order_id' });
+  Invoice.belongsTo(Order, { foreignKey: 'order_id' });
 
-    // PasswordReset Associations
-    db.PasswordReset.belongsTo(db.User, { foreignKey: "user_id" });
+  // Wishlist associations
+  Wishlist.belongsTo(User, { foreignKey: 'user_id' });
+  User.hasMany(Wishlist, { foreignKey: 'user_id' });
 
-    // OTPManager Associations
-    db.OTPManager.belongsTo(db.User, { foreignKey: "user_id" });
+  Wishlist.belongsTo(Product, { foreignKey: 'product_id' });
+  Product.hasMany(Wishlist, { foreignKey: 'product_id' });
 
-    // UserPermission Associations
-    db.UserPermission.belongsTo(db.User, { foreignKey: "user_id" });
-    db.UserPermission.belongsTo(db.Role, { foreignKey: "role_id" });
+  // Checkout associations
+  Checkout.belongsTo(User, { foreignKey: 'user_id' });
+  User.hasMany(Checkout, { foreignKey: 'user_id' });
 
-    // SupportHelp Associations
-    db.SupportHelp.belongsTo(db.User, { foreignKey: "user_id" });
-    db.SupportHelp.hasMany(db.SupportHelpMessages, {
-      foreignKey: "support_help_id",
-    });
+  Checkout.belongsTo(Product, { foreignKey: 'product_id' });
+  Product.hasMany(Checkout, { foreignKey: 'product_id' });
 
-    // SupportHelpMessages Associations
-    db.SupportHelpMessages.belongsTo(db.SupportHelp, {
-      foreignKey: "support_help_id",
-    });
+  // PasswordReset associations
+  PasswordReset.belongsTo(User, { foreignKey: 'user_id' });
+  User.hasMany(PasswordReset, { foreignKey: 'user_id' });
 
-    // OrderTracking Associations (Optional - Consider adding a foreign key to Order)
-    // db.OrderTracking.belongsTo(db.Order, { foreignKey: 'order_id' });
+  // OTPManager associations
+  OTPManager.belongsTo(User, { foreignKey: 'user_id' });
+  User.hasMany(OTPManager, { foreignKey: 'user_id' });
+
+  // UserPermission associations
+  UserPermission.belongsTo(User, { foreignKey: 'user_id' });
+  User.hasMany(UserPermission, { foreignKey: 'user_id' });
+
+  // SupportHelp associations
+  SupportHelp.belongsTo(User, { foreignKey: 'user_id' });
+  User.hasMany(SupportHelp, { foreignKey: 'user_id' });
+
+  SupportHelp.hasMany(SupportHelpMessages, { foreignKey: 'support_help_id' });
+  SupportHelpMessages.belongsTo(SupportHelp, { foreignKey: 'support_help_id' });
+
+  // UserDeliveryAddress associations
+  UserDeliveryAddress.belongsTo(User, { foreignKey: 'user_id' });
+  User.hasMany(UserDeliveryAddress, { foreignKey: 'user_id' });
 
     console.log("Associations defined successfully.");
   } catch (error) {
-    console.error("Error defining associations:", error);
+    console.log("Unable to create association");
   }
+  
 };
-
 const predefinedRoles = [
   { role_name: "admin" },
   { role_name: "manager" },
@@ -103,11 +113,11 @@ const predefinedRoles = [
 
 const insertRoles = async () => {
   try {
-    await db.Role.sync({ alter: true });
+    await Role.sync({ alter: true });
 
-    const existingRoles = await db.Role.findAll();
+    const existingRoles = await Role.findAll();
     if (existingRoles.length === 0) {
-      await db.Role.bulkCreate(predefinedRoles);
+      await Role.bulkCreate(predefinedRoles);
       console.log("Predefined roles have been inserted.");
     } else {
       console.log("Roles already exist in the database.");
@@ -120,7 +130,7 @@ const insertRoles = async () => {
 const predefinedUsers = async () => {
   try {
     // Find roles by name
-    const roles = await db.Role.findAll();
+    const roles = await Role.findAll();
     const roleMap = {};
     roles.forEach((role) => {
       roleMap[role.role_name] = role.role_id;
@@ -162,10 +172,10 @@ const predefinedUsers = async () => {
     ];
 
     // Check if users already exist
-    const existingUsers = await db.User.findAll();
+    const existingUsers = await User.findAll();
     if (existingUsers.length === 0) {
       // Insert predefined users if they do not exist
-      await db.User.bulkCreate(users);
+      await User.bulkCreate(users);
       console.log("Predefined users have been inserted.");
     } else {
       console.log("Users already exist in the database.");
