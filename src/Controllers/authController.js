@@ -27,7 +27,6 @@ const register = async (req, res) => {
     try {
 
         const customerRole = await Role.findOne({ where: { role_name: 'customer' } });
-
         if (!customerRole) {
             return res.status(400).json({
                 status: 'failed',
@@ -40,6 +39,7 @@ const register = async (req, res) => {
                 ]
             });
         }
+
         const hashedPassword = await hashPassword(password);
         const result = await OTPManager.findOne({ where: { auth_token: email, otp_reason: 'email_verify' } });
         const user = await User.create({

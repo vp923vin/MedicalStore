@@ -5,32 +5,28 @@ module.exports = (sequelize, DataTypes) => {
       autoIncrement: true,
       primaryKey: true
     },
-    user_id: {
-      type: DataTypes.INTEGER,
+    auth_user: {
+      type: DataTypes.STRING(80),
       allowNull: false
     },
-    email_verify_otp: {
-      type: DataTypes.STRING,
+    auth_token:{
+      type: DataTypes.STRING(150),
       allowNull: true
     },
-    mobile_verify_otp: {
-      type: DataTypes.STRING,
+    otp: {
+      type: DataTypes.INTEGER(10),
+      allowNull: false
+    },
+    otp_reason: {
+      type: DataTypes.ENUM('email_verify', 'password_reset', 'payment_verify', 'order_verify', 'mobile_verify', 'ticket_verify', 'register_user', 'other_verify'),
+      allowNull: false
+    },
+    otp_status: {
+      type: DataTypes.ENUM('deliver', 'verify'),
       allowNull: true
     },
-    password_reset_otp: {
-      type: DataTypes.STRING,
-      allowNull: true
-    },
-    order_receive_otp: {
-      type: DataTypes.STRING,
-      allowNull: true
-    },
-    order_verify_otp: {
-      type: DataTypes.STRING,
-      allowNull: true
-    },
-    others_otp: {
-      type: DataTypes.STRING,
+    otp_expiry: {
+      type: DataTypes.DATE,
       allowNull: true
     },
     createdAt: {

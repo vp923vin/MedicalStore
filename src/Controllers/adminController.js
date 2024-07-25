@@ -293,7 +293,7 @@ const deleteUserProfile = async (req, res) => {
         });
     }
 };
-
+// create user by admin
 
 module.exports = {
     createRole,
