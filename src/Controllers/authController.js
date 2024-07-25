@@ -23,7 +23,7 @@ const register = async (req, res) => {
             errors: formattedErrors,
         });
     }
-    const { username, email, password, mobile } = req.body;
+    const { fullname, username, email, password, mobile } = req.body;
     try {
 
         const customerRole = await Role.findOne({ where: { role_name: 'customer' } });
@@ -41,12 +41,17 @@ const register = async (req, res) => {
         }
 
         const hashedPassword = await hashPassword(password);
-        const result = await OTPManager.findOne({ where: { auth_token: email, otp_reason: 'email_verify' } });
+        const result = await OTPManager.findOne({ where: { auth_token: email, otp_reason: 'email_verify', otp_status: 'verified' } });
+        // genrate random username that not present in db
+        // fullname enter 
+        // send registration email
+        // change set mpin for no password login/login without password
         const user = await User.create({
+            fullname,
             username,
             email,
             password: hashedPassword,
-            phone_number: mobile,
+            phone: mobile,
             role_id: customerRole.role_id,
             email_verified_at: result ? new Date() : null,
         });
@@ -79,6 +84,7 @@ const login = async (req, res) => {
     }
     const { email, password } = req.body;
     try {
+        // password less functionality add
         const user = await User.scope('withPassword').findOne({ where: { email } });
         if (!user) {
             return res.status(400).json({
@@ -157,6 +163,7 @@ const verifyEmail = async (req, res) => {
             otp: otp,
             auth_token: token,
             otp_reason: 'email_verify',
+            otp_status: 'delivered',
             createdAt: new Date(),
             expiresAt: otpExpiry
         });
@@ -241,6 +248,7 @@ const verifyEmailOTP = async (req, res) => {
         await otpRecord.update({
             auth_token: decoded.user_email,
             otp: null,
+            otp_status: 'verified',
             expiresAt: null
         });
 
@@ -291,19 +299,21 @@ const forgetPassword = async (req, res) => {
             user_id: user.user_id,
             otp_expiry: otpExpiry,
             otp_reason: 'password_reset',
+            otp_status: 'delivered',
         });
         await OTPManager.create({
             user_id: user.user_id,
             otp: otp,
             auth_token: token,
             otp_reason: 'password_reset',
+            otp_status: 'delivered',
             createdAt: new Date(),
             expiresAt: otpExpiry
         });
         const emailTemplatePath = path.join(__dirname, '..', 'Views', 'emails', 'otpSend.ejs');
 
         const emailTemplate = await ejs.renderFile(emailTemplatePath, {
-            name: user.username,
+            name: user.fullname,
             otp: otp,
             otp_expiry: otpExpiry,
             appName: appConfig.appName
@@ -363,6 +373,7 @@ const verifyOTP = async (req, res) => {
                 otp: otp,
                 auth_token: token,
                 otp_reason: decoded.otp_reason,
+                otp_status: decoded.otp_status,
                 expiresAt: { [Op.gt]: new Date() }
             }
         });
@@ -374,6 +385,7 @@ const verifyOTP = async (req, res) => {
                 message: 'Invalid or expired OTP',
             });
         }
+        // TODO: here update the first check the token is expired or not then send verified or unverified newToken send
         const genNewToken = await generatePayloadToken({
             user_id: decoded.user_id,
             otp_expiry: 'Expired',
@@ -425,7 +437,7 @@ const resendOTP = async (req, res) => {
                 errors: [{ message: 'User Not Exists' }]
             });
         }
-
+        //  here need to changes as well because updated the above function
         const otp = generateRandomNumber();
         const otpExpiry = new Date(Date.now() + 15 * 60 * 1000);
         const genNewToken = await generatePayloadToken({

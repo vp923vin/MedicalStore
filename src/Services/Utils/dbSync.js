@@ -143,6 +143,7 @@ const predefinedUsers = async () => {
         password: await bcrypt.hash("12345678", 10),
         email: "admin@gmail.com",
         phone: "1234567898",
+        is_active: 'active',
         role_id: roleMap["admin"],
       },
       {
@@ -151,6 +152,7 @@ const predefinedUsers = async () => {
         password: await bcrypt.hash("12345678", 10),
         email: "manager@gmail.com",
         phone: "1234576898",
+        is_active: 'active',
         role_id: roleMap["manager"],
       },
       {
@@ -159,6 +161,7 @@ const predefinedUsers = async () => {
         password: await bcrypt.hash("12345678", 10),
         email: "customer@gmail.com",
         phone: "1234567988",
+        is_active: 'active',
         role_id: roleMap["customer"],
       },
       {
@@ -167,6 +170,7 @@ const predefinedUsers = async () => {
         password: await bcrypt.hash("12345678", 10),
         email: "deliveryBoy@gmail.com",
         phone: "1234568798",
+        is_active: 'active',
         role_id: roleMap["deliveryBoy"],
       },
     ];

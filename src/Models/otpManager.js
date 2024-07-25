@@ -5,8 +5,8 @@ module.exports = (sequelize, DataTypes) => {
       autoIncrement: true,
       primaryKey: true
     },
-    auth_user: {
-      type: DataTypes.STRING(80),
+    user_id: {
+      type: DataTypes.INTEGER,
       allowNull: false
     },
     auth_token:{
@@ -22,11 +22,11 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false
     },
     otp_status: {
-      type: DataTypes.ENUM('deliver', 'verify'),
+      type: DataTypes.ENUM('delivered', 'verified'),
       allowNull: true
     },
-    otp_expiry: {
-      type: DataTypes.DATE,
+    otp_expiry:{
+      type: DataTypes.STRING(150),
       allowNull: true
     },
     createdAt: {
@@ -38,6 +38,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE,
       allowNull: false,
       field: 'updated_at'
+    },
+    expiresAt: {
+      type: DataTypes.DATE,
+      field: 'expires_at'
     },
     deletedAt: {
       type: DataTypes.DATE,
