@@ -11,6 +11,7 @@ const { hashPassword, comparePassword } = require('../Services/Utils/hashPasswor
 const formatErrors = require('../Services/Utils/formErrorFormat');
 const { sendMail } = require('../Services/Utils/mailService');
 const { generateRandomNumber } = require('../Services/Utils/randomNumGen');
+const { generateRandomUsername, generateMPIN } = require('../Services/Utils/functions');
 
 const register = async (req, res) => {
     const errors = validationResult(req);
@@ -42,25 +43,54 @@ const register = async (req, res) => {
 
         const hashedPassword = await hashPassword(password);
         const result = await OTPManager.findOne({ where: { auth_token: email, otp_reason: 'email_verify', otp_status: 'verified' } });
-        // genrate random username that not present in db
-        // fullname enter 
-        // send registration email
-        // change set mpin for no password login/login without password
+
+        let newUsername = username || generateRandomUsername(fullname);
+        while (await User.findOne({ where: { username: newUsername } })) {
+            newUsername = generateRandomUsername(fullname);
+        }
+
+        const mpin = generateMPIN() + '';
+        const encrytMPIN = await hashPassword(mpin);
         const user = await User.create({
             fullname,
-            username,
+            username: newUsername,
             email,
             password: hashedPassword,
+            mpin: encrytMPIN,
             phone: mobile,
             role_id: customerRole.role_id,
             email_verified_at: result ? new Date() : null,
         });
 
-        return res.status(201).json({
-            status: 'success',
-            statusCode: 201,
-            message: 'User registered successfully',
-        });
+        if(user){
+            const emailTemplatePath = path.join(__dirname, '..', 'Views', 'emails', 'register.ejs');
+    
+            const emailTemplate = await ejs.renderFile(emailTemplatePath, {
+                name: fullname,
+                username: newUsername,
+                email,
+                password,
+                mpin,
+                appName: appConfig.appName
+            });
+    
+            const subject = 'User Registeration';
+            const text = `User Registeration`;
+            await sendMail(email, subject, text, emailTemplate);
+    
+            return res.status(201).json({
+                status: 'success',
+                statusCode: 201,
+                message: 'User registered successfully',
+            });
+        }else{
+            return res.status(400).json({
+                status: 'failed',
+                statusCode: 400,
+                message: 'Something went wrong in server, Please try again after Some time',
+                errors: [{message: 'Unable to Register User'}]
+            });
+        }
     } catch (error) {
         return res.status(500).json({
             status: 'failed',
@@ -69,7 +99,7 @@ const register = async (req, res) => {
             errors: error.message
         });
     }
-};
+}; // completed
 
 const login = async (req, res) => {
     const errors = validationResult(req);
@@ -198,7 +228,7 @@ const verifyEmail = async (req, res) => {
             error: error.message
         });
     }
-};
+}; // completed
 
 const verifyEmailOTP = async (req, res) => {
     const errors = validationResult(req);
@@ -247,7 +277,6 @@ const verifyEmailOTP = async (req, res) => {
 
         await otpRecord.update({
             auth_token: decoded.user_email,
-            otp: null,
             otp_status: 'verified',
             expiresAt: null
         });
@@ -265,7 +294,7 @@ const verifyEmailOTP = async (req, res) => {
             error: error.message
         });
     }
-};
+}; // completed
 
 const forgetPassword = async (req, res) => {
     const errors = validationResult(req);
@@ -567,6 +596,14 @@ const resetPassword = async (req, res) => {
             error: error.message
         });
     }
+};
+
+const verifyMobile = async function(req, res) {
+    // Integration of twilio
+};
+
+const verifyMobileOTP = async function(req, res){
+    // mobile otp verification
 };
 
 const logout = async (req, res) => { 

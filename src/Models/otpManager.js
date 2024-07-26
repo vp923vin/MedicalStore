@@ -7,15 +7,15 @@ module.exports = (sequelize, DataTypes) => {
     },
     user_id: {
       type: DataTypes.INTEGER,
-      allowNull: false
+      allowNull: true,
     },
     auth_token:{
-      type: DataTypes.STRING(150),
-      allowNull: true
+      type: DataTypes.TEXT,
+      allowNull: false,
     },
     otp: {
       type: DataTypes.INTEGER(10),
-      allowNull: false
+      allowNull: false,
     },
     otp_reason: {
       type: DataTypes.ENUM('email_verify', 'password_reset', 'payment_verify', 'order_verify', 'mobile_verify', 'ticket_verify', 'register_user', 'other_verify'),
@@ -23,7 +23,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     otp_status: {
       type: DataTypes.ENUM('delivered', 'verified'),
-      allowNull: true
+      allowNull: false
     },
     otp_expiry:{
       type: DataTypes.STRING(150),

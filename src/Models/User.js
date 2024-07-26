@@ -25,6 +25,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING(255),
       allowNull: false
     },
+    mpin: {
+      type: DataTypes.STRING(255),
+      allowNull: false
+    },
     phone: {
       type: DataTypes.STRING(50),
       allowNull: false
@@ -67,12 +71,12 @@ module.exports = (sequelize, DataTypes) => {
     paranoid: true,
     defaultScope: {
       // Exclude password by default
-      attributes: { exclude: ['password'] },
+      attributes: { exclude: ['password', 'mpin'] },
     },
     scopes: {
       // Define a scope to include the password
       withPassword: {
-        attributes: { include: ['password'] }
+        attributes: { include: ['password', 'mpin'] }
       }
     }
   });
