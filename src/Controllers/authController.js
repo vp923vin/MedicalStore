@@ -12,6 +12,8 @@ const formatErrors = require('../Services/Utils/formErrorFormat');
 const { sendMail } = require('../Services/Utils/mailService');
 const { generateRandomNumber } = require('../Services/Utils/randomNumGen');
 const { generateRandomUsername, generateMPIN, isOTPExpired } = require('../Services/Utils/functions');
+const sendMobileMessage = require('../Services/Utils/sendMobileOtp');
+const { send } = require('process');
 
 const register = async (req, res) => {
     const errors = validationResult(req);
@@ -43,7 +45,7 @@ const register = async (req, res) => {
 
         const hashedPassword = await hashPassword(password);
         const result = await OTPManager.findOne({ where: { auth_token: email, otp_reason: 'email_verify', otp_status: 'verified' } });
-
+        const mobileVer = await OTPManager.findOne({ where: { auth_token: mobile, otp_reason: 'mobile_verify', otp_status: 'verified' } });
         let newUsername = username || generateRandomUsername(fullname);
         while (await User.findOne({ where: { username: newUsername } })) {
             newUsername = generateRandomUsername(fullname);
@@ -60,6 +62,7 @@ const register = async (req, res) => {
             phone: mobile,
             role_id: customerRole.role_id,
             email_verified_at: result ? new Date() : null,
+            mobile_verified_at: mobileVer ? new Date() : null,
         });
 
         if(user){
@@ -163,7 +166,7 @@ const login = async (req, res) => {
             error: error.message
         });
     }
-};
+}; 
 
 const verifyEmail = async (req, res) => {
     const errors = validationResult(req);
@@ -261,8 +264,7 @@ const verifyEmailOTP = async (req, res) => {
             where: {
                 otp: otp,
                 auth_token: token,
-                otp_reason: 'email_verify',
-                expiresAt: { [Op.gt]: new Date() }
+                otp_reason: 'email_verify'
             }
         });
 
@@ -270,21 +272,132 @@ const verifyEmailOTP = async (req, res) => {
             return res.status(400).json({
                 status: 'failed',
                 statusCode: 400,
-                message: 'Invalid or Expired OTP ',
-                errors: [{ message: 'Invalid or Expired OTP' }]
+                message: 'Invalid OTP',
+                errors: [{ message: 'Invalid OTP' }]
             });
         }
+        if(isOTPExpired(otpRecord.expiresAt)) {
+            const newToken = await generatePayloadToken({
+                otp: null,
+                otp_reason: 'email_verify',
+                otp_status: 'failed',
+                otp_expiry: 'Expired',
+                auth_token: decoded.user_email,
+            });
+            await otpRecord.update({
+                otp: null,
+                otp_reason: 'email_verify',
+                otp_expiry: 'Expired',
+                auth_token: decoded.user_email,
+                otp_status: 'failed',
+                expiresAt: null
+            });
+            return res.status(400).json({
+                status: 'failed',
+                statusCode: 400,
+                message: 'OTP Expired',
+                data: {
+                    token: newToken,
+                }
+            });
+        }else{
+            await otpRecord.update({
+                otp: null,
+                otp_reason: 'email_verify',
+                otp_expiry: 'verified',
+                auth_token: decoded.user_email,
+                otp_status: 'verified',
+                expiresAt: null
+            });
+    
+            return res.status(200).json({
+                status: 'success',
+                statusCode: 200,
+                message: 'Email verified successfully',
+            });
+        }
+    } catch (error) {
+        return res.status(500).json({
+            status: 'failed',
+            statusCode: 500,
+            message: 'Something went wrong in server.',
+            error: error.message
+        });
+    }
+}; // completed
+
+const resendEmailOTP = async function(req, res) {
+    const authHeader = req.headers['authorization'];
+    if (!authHeader) {
+        return res.status(401).json({
+            status: 'failed',
+            statusCode: 401,
+            message: 'Unauthorized',
+            errors: [{message: 'Unauthorized'}]
+        });
+    }
+
+    const token = authHeader.split(' ')[1];
+    try {
+        const decoded = await decodeToken(token);
+        const otpRecord = await OTPManager.findOne({
+            where: {
+                auth_token: decoded.user_email,
+                otp_reason: 'email_verify',
+                otp_status: 'failed',
+                otp_expiry: 'Expired',
+            }
+        });
+        if (!otpRecord) {
+            return res.status(400).json({
+                status: 'failed',
+                statusCode: 400,
+                message: 'Invalied request',
+                errors: [{ message: 'Invalied request' }]
+            });
+        }
+        const otp = generateRandomNumber();
+        const otpExpiry = new Date(Date.now() + 15 * 60 * 1000); // 15 min. expiration
+        const newToken = await generatePayloadToken({
+            otp: otp,
+            user: 'new_user',
+            user_email: email,
+            otp_reason: 'email_verify',
+            otp_status: 'resend_email',
+            otp_expiry: otpExpiry
+        });
 
         await otpRecord.update({
-            auth_token: decoded.user_email,
-            otp_status: 'verified',
-            expiresAt: null
+            otp: otp,
+            otp_reason: 'email_verify',
+            otp_expiry: null,
+            auth_token: newToken,
+            otp_status: 'resend_email',
+            expiresAt: otpExpiry
         });
+        
+
+        const emailTemplatePath = path.join(__dirname, '..', 'Views', 'emails', 'otpSend.ejs');
+        const emailTemplate = await ejs.renderFile(emailTemplatePath, {
+            name: 'user',
+            otp: otp,
+            otp_expiry: otpExpiry,
+            appName: appConfig.appName
+        });
+
+        const subject = 'Resend Email Verification - OTP';
+        const text = `Resend Email Verification - OTP`;
+        await sendMail(email, subject, text, emailTemplate);
+        
 
         return res.status(200).json({
             status: 'success',
             statusCode: 200,
-            message: 'Email verified successfully',
+            message: 'Verification OTP resent successfully',
+            data: { 
+                token: newToken, 
+                otp_expiry: otpExpiry 
+            }
         });
     } catch (error) {
         return res.status(500).json({
@@ -627,15 +740,161 @@ const resetPassword = async (req, res) => {
             error: error.message
         });
     }
-}; //completed
+}; // completed
+
 
 const verifyMobile = async function(req, res) {
-    // Integration of twilio
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        const formattedErrors = formatErrors(errors.array());
+        return res.status(400).json({
+            status: 'failed',
+            statusCode: 400,
+            message: "Validation Failed",
+            errors: formattedErrors,
+        });
+    }
+
+    const { mobile } = req.body;
+    try {
+        const otp = generateRandomNumber();
+        const otpExpiry = new Date(Date.now() + 15 * 60 * 1000); // 15 min. expiration
+        const token = await generatePayloadToken({
+            user: 'new_user',
+            user_mobile: mobile,
+            otp_reason: 'mobile_verify',
+            otp_expiry: otpExpiry
+        });
+
+        await OTPManager.create({
+            user_id: null,
+            otp: otp,
+            auth_token: token,
+            otp_reason: 'mobile_verify',
+            otp_status: 'delivered',
+            createdAt: new Date(),
+            expiresAt: otpExpiry
+        });
+
+        const message = `Your OTP for mobile verification is ${otp}. It will expire in 15 minutes.`;
+        const sendStatus = await sendMobileMessage(message, mobile);
+        return res.status(200).json({
+            status: 'success',
+            statusCode: 200,
+            message: 'Verification SMS sent successfully',
+            data: { 
+                token: token, 
+                otp_expiry: otpExpiry,
+                message: sendStatus ? 'MObile Otp Send Successfully' : 'Unable to send Otp on your device', 
+            }
+        });
+    } catch (error) {
+        return res.status(500).json({
+            status: 'failed',
+            statusCode: 500,
+            message: 'Something went wrong in server.',
+            error: error.message
+        });
+    }
 };
 
-const verifyMobileOTP = async function(req, res){
-    // mobile otp verification
+const verifyMobileOTP = async function(req, res) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        const formattedErrors = formatErrors(errors.array());
+        return res.status(400).json({
+            status: 'failed',
+            statusCode: 400,
+            message: "Validation Failed",
+            errors: formattedErrors,
+        });
+    }
+
+    const { otp } = req.body;
+    const authHeader = req.headers['authorization'];
+    if (!authHeader) {
+        return res.status(401).json({
+            status: 'failed',
+            statusCode: 401,
+            message: 'Unauthorized',
+            errors: [{ message: 'Unauthorized' }],
+        });
+    }
+
+    const token = authHeader.split(' ')[1];
+    try {
+        const decoded = await decodeToken(token);
+        const otpRecord = await OTPManager.findOne({
+            where: {
+                otp: otp,
+                auth_token: token,
+                otp_reason: 'mobile_verify'
+            }
+        });
+
+        if (!otpRecord) {
+            return res.status(400).json({
+                status: 'failed',
+                statusCode: 400,
+                message: 'Invalid OTP',
+                errors: [{ message: 'Invalid OTP' }]
+            });
+        }
+
+        if(isOTPExpired(otpEntry.expiresAt)){
+            const user = await User.findOne({ where: { user_id: decoded.user_id } });
+            const newToken = await generatePayloadToken({
+                user_mobile: user.mobile,
+                otp_expiry: 'Expired',
+                otp_reason: 'mobile_verify',
+                otp_status: 'failed',
+            });
+            await otpRecord.update({
+                otp: null,
+                auth_token: decoded.user_mobile,
+                otp_status: 'failed',
+                expiresAt: null
+            });
+    
+            return res.status(400).json({
+                status: 'failed',
+                statusCode: 400,
+                message: 'OTP Expired, Resend OTP',
+                data: {
+                    token: newToken,
+                }
+            });
+        }else{
+            await otpRecord.update({
+                otp: null,
+                auth_token: decoded.user_mobile,
+                otp_status: 'verified',
+                expiresAt: null
+            });
+    
+            return res.status(200).json({
+                status: 'success',
+                statusCode: 200,
+                message: 'Mobile verified successfully',
+            });
+
+        }
+    } catch (error) {
+        return res.status(500).json({
+            status: 'failed',
+            statusCode: 500,
+            message: 'Something went wrong in server.',
+            error: error.message
+        });
+    }
 };
+
+
+const resendMobileOTP = async function(req, res){
+    // here logic for mobile and email otp to resend. 
+}; 
+
+
 
 const logout = async (req, res) => { 
 
@@ -650,5 +909,9 @@ module.exports = {
     verifyOTP,
     resendOTP,
     resetPassword,
+    verifyMobile,
+    verifyMobileOTP,
+    resendEmailOTP,
+    resendMobileOTP,
     logout
 }

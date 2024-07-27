@@ -8,6 +8,10 @@ const {
     verifyOTP,
     resendOTP,
     resetPassword,
+    verifyMobile,
+    verifyMobileOTP,
+    resendEmailOTP,
+    resendMobileOTP,
     logout
 } = require('../Controllers/authController');
 const { 
@@ -35,4 +39,8 @@ router.post('/resend-otp', resendOTP);
 router.post('/reset-password', passwordValidationRules(), resetPassword);
 router.post('/verify-email', emailValidatorRules(), verifyEmail);
 router.post('/verify-email-otp', otpValidatorRules(), verifyEmailOTP);
+router.post('/resend-email-otp',  resendEmailOTP);
+router.post('/verify-mobile',  verifyMobile);
+router.post('/verify-mobile-otp',  verifyMobileOTP);
+router.post('/resend-mobile-otp',  resendMobileOTP);
 module.exports = router;
