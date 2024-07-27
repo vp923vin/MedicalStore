@@ -7,7 +7,12 @@ const generateMPIN = () => {
     return Math.floor(111111 + Math.random() * 888889);
 };
 
+const isOTPExpired = (expiresAt) => {
+    return new Date() > new Date(expiresAt);
+};
+
 module.exports = {
     generateRandomUsername,
-    generateMPIN
+    generateMPIN,
+    isOTPExpired
 }

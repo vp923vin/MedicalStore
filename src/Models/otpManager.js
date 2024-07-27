@@ -15,14 +15,14 @@ module.exports = (sequelize, DataTypes) => {
     },
     otp: {
       type: DataTypes.INTEGER(10),
-      allowNull: false,
+      allowNull: true,
     },
     otp_reason: {
       type: DataTypes.ENUM('email_verify', 'password_reset', 'payment_verify', 'order_verify', 'mobile_verify', 'ticket_verify', 'register_user', 'other_verify'),
       allowNull: false
     },
     otp_status: {
-      type: DataTypes.ENUM('delivered', 'verified'),
+      type: DataTypes.ENUM('delivered', 'verified', 'failed', 'resend'),
       allowNull: false
     },
     otp_expiry:{
