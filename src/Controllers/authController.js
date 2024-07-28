@@ -158,7 +158,7 @@ const login = async (req, res) => {
             data: { token: token },
         });
     } catch (error) {
-        console.error('Error in login function:', error);
+        // console.error('Error in login function:', error);
         return res.status(500).json({
             status: 'failed',
             statusCode: 500,
@@ -265,7 +265,9 @@ const verifyEmailOTP = async (req, res) => {
                 otp: otp,
                 auth_token: token,
                 otp_reason: 'email_verify'
-            }
+            },
+            order: [['otp_id', 'DESC']],
+            limit: 1
         });
 
         if (!otpRecord) {
@@ -282,7 +284,7 @@ const verifyEmailOTP = async (req, res) => {
                 otp_reason: 'email_verify',
                 otp_status: 'failed',
                 otp_expiry: 'Expired',
-                auth_token: decoded.user_email,
+                user_email: decoded.user_email,
             });
             await otpRecord.update({
                 otp: null,
@@ -304,9 +306,9 @@ const verifyEmailOTP = async (req, res) => {
             await otpRecord.update({
                 otp: null,
                 otp_reason: 'email_verify',
-                otp_expiry: 'verified',
+                otp_expiry: 'Verified',
                 auth_token: decoded.user_email,
-                otp_status: 'verified',
+                otp_status: 'Verified',
                 expiresAt: null
             });
     
@@ -340,14 +342,20 @@ const resendEmailOTP = async function(req, res) {
     const token = authHeader.split(' ')[1];
     try {
         const decoded = await decodeToken(token);
+        console.log("token", decoded);
         const otpRecord = await OTPManager.findOne({
             where: {
-                auth_token: decoded.user_email,
+                otp: null,
                 otp_reason: 'email_verify',
-                otp_status: 'failed',
                 otp_expiry: 'Expired',
-            }
+                auth_token: decoded.user_email,
+                otp_status: 'failed',
+                expiresAt: null
+            },
+            order: [['otp_id', 'DESC']],
+            limit: 1
         });
+        console.log("record", otpRecord);
         if (!otpRecord) {
             return res.status(400).json({
                 status: 'failed',
@@ -361,7 +369,7 @@ const resendEmailOTP = async function(req, res) {
         const newToken = await generatePayloadToken({
             otp: otp,
             user: 'new_user',
-            user_email: email,
+            user_email: decoded.user_email,
             otp_reason: 'email_verify',
             otp_status: 'resend_email',
             otp_expiry: otpExpiry
@@ -372,11 +380,10 @@ const resendEmailOTP = async function(req, res) {
             otp_reason: 'email_verify',
             otp_expiry: null,
             auth_token: newToken,
-            otp_status: 'resend_email',
+            otp_status: 'resend',
             expiresAt: otpExpiry
         });
-        
-
+    
         const emailTemplatePath = path.join(__dirname, '..', 'Views', 'emails', 'otpSend.ejs');
         const emailTemplate = await ejs.renderFile(emailTemplatePath, {
             name: 'user',
@@ -387,7 +394,7 @@ const resendEmailOTP = async function(req, res) {
 
         const subject = 'Resend Email Verification - OTP';
         const text = `Resend Email Verification - OTP`;
-        await sendMail(email, subject, text, emailTemplate);
+        await sendMail(decoded.user_email, subject, text, emailTemplate);
         
 
         return res.status(200).json({
@@ -509,7 +516,7 @@ const verifyOTP = async (req, res) => {
 
     try {
         const decoded = await decodeToken(token);
-        console.log(decoded);
+        // console.log(decoded);
         const otpEntry = await OTPManager.findOne({
             where: {
                 user_id: decoded.user_id,
@@ -517,7 +524,9 @@ const verifyOTP = async (req, res) => {
                 auth_token: token,
                 otp_reason: decoded.otp_reason,
                 otp_status: decoded.otp_status
-            }
+            },
+            order: [['otp_id', 'DESC']],
+            limit: 1
         });
 
         if (!otpEntry) {
@@ -628,7 +637,9 @@ const resendOTP = async (req, res) => {
                 auth_token: token, 
                 otp_reason: 'password_reset', 
                 user_id: user.user_id,
-            }
+            },
+            order: [['otp_id', 'DESC']],
+            limit: 1
         });
 
         const emailTemplatePath = path.join(__dirname, '..', 'Views', 'emails', 'otpSend.ejs');
@@ -713,7 +724,9 @@ const resetPassword = async (req, res) => {
                 auth_token: token,
                 otp_reason: 'password_reset',
                 expiresAt: null,
-            }
+            },
+            order: [['otp_id', 'DESC']],
+            limit: 1
         });
 
         if (!otpEntry) {
@@ -778,16 +791,30 @@ const verifyMobile = async function(req, res) {
 
         const message = `Your OTP for mobile verification is ${otp}. It will expire in 15 minutes.`;
         const sendStatus = await sendMobileMessage(message, mobile);
-        return res.status(200).json({
-            status: 'success',
-            statusCode: 200,
-            message: 'Verification SMS sent successfully',
-            data: { 
-                token: token, 
-                otp_expiry: otpExpiry,
-                message: sendStatus ? 'MObile Otp Send Successfully' : 'Unable to send Otp on your device', 
-            }
-        });
+    
+        if (sendStatus) {
+            return res.status(200).json({
+                status: 'success',
+                statusCode: 200,
+                message: 'Verification SMS sent successfully',
+                data: { 
+                    token: token, 
+                    otp_expiry: otpExpiry,
+                    message: 'Mobile OTP sent successfully'
+                }
+            });
+        } else {
+            return res.status(400).json({
+                status: 'failed',
+                statusCode: 400,
+                message: 'Unable to send OTP. Please try again later.',
+                data: { 
+                    token: token, 
+                    otp_expiry: otpExpiry,
+                    message: 'Unable to send OTP on your device'
+                }
+            });
+        }
     } catch (error) {
         return res.status(500).json({
             status: 'failed',
@@ -796,7 +823,7 @@ const verifyMobile = async function(req, res) {
             error: error.message
         });
     }
-};
+}; // completed
 
 const verifyMobileOTP = async function(req, res) {
     const errors = validationResult(req);
@@ -829,7 +856,10 @@ const verifyMobileOTP = async function(req, res) {
                 otp: otp,
                 auth_token: token,
                 otp_reason: 'mobile_verify'
-            }
+            },
+            order: [['otp_id', 'DESC']],
+            limit: 1
+
         });
 
         if (!otpRecord) {
@@ -841,10 +871,9 @@ const verifyMobileOTP = async function(req, res) {
             });
         }
 
-        if(isOTPExpired(otpEntry.expiresAt)){
-            const user = await User.findOne({ where: { user_id: decoded.user_id } });
+        if(isOTPExpired(otpRecord.expiresAt)){
             const newToken = await generatePayloadToken({
-                user_mobile: user.mobile,
+                user_mobile: decoded.user_mobile,
                 otp_expiry: 'Expired',
                 otp_reason: 'mobile_verify',
                 otp_status: 'failed',
@@ -887,14 +916,97 @@ const verifyMobileOTP = async function(req, res) {
             error: error.message
         });
     }
-};
+}; // completed
 
 
-const resendMobileOTP = async function(req, res){
-    // here logic for mobile and email otp to resend. 
-}; 
+const resendMobileOTP = async function(req, res) {
+    const authHeader = req.headers['authorization'];
+    if (!authHeader) {
+        return res.status(401).json({
+            status: 'failed',
+            statusCode: 401,
+            message: 'Unauthorized',
+            errors: [{ message: 'Unauthorized' }]
+        });
+    }
 
+    const token = authHeader.split(' ')[1];
+    try {
+        const decoded = await decodeToken(token);
 
+        // Find the expired OTP record
+        const otpRecord = await OTPManager.findOne({
+            where: {
+                otp_reason: 'mobile_verify',
+                otp: null,
+                auth_token: decoded.user_mobile
+            },
+            order: [['otp_id', 'DESC']],
+            limit: 1,
+        });
+
+        if (!otpRecord) {
+            return res.status(400).json({
+                status: 'failed',
+                statusCode: 400,
+                message: 'Invalid request',
+                errors: [{ message: 'Invalid request' }]
+            });
+        }
+
+        const otp = generateRandomNumber();
+        const otpExpiry = new Date(Date.now() + 15 * 60 * 1000); // 15 min expiration
+        const newToken = await generatePayloadToken({
+            user: 'new_user',
+            user_mobile: decoded.user_mobile,
+            otp_reason: 'mobile_verify',
+            otp_expiry: otpExpiry
+        });
+
+        await otpRecord.update({
+            otp: otp,
+            otp_status: 'resend',
+            otp_reason: 'mobile_verify',
+            auth_token: newToken,
+            expiresAt: otpExpiry
+        });
+
+        const message = `Your OTP for mobile verification is ${otp}. It will expire in 15 minutes.`;
+        const sendStatus = await sendMobileMessage(message, decoded.user_mobile);
+
+        if (sendStatus) {
+            return res.status(200).json({
+                status: 'success',
+                statusCode: 200,
+                message: 'Verification SMS resent successfully',
+                data: {
+                    token: newToken,
+                    otp_expiry: otpExpiry,
+                    message: 'Mobile OTP resent successfully'
+                }
+            });
+        } else {
+            return res.status(400).json({
+                status: 'failed',
+                statusCode: 400,
+                message: 'Unable to resend OTP. Please try again later.',
+                data: {
+                    token: newToken,
+                    otp_expiry: otpExpiry,
+                    message: 'Unable to resend OTP on your device'
+                }
+            });
+        }
+    } catch (error) {
+        return res.status(500).json({
+            status: 'failed',
+            statusCode: 500,
+            message: 'Something went wrong in server.',
+            error: error.message
+        });
+    }
+}; // completed
+ 
 
 const logout = async (req, res) => { 
 
