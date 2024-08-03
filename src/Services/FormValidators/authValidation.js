@@ -1,6 +1,6 @@
 const { body } = require('express-validator');
 const validator = require('validator');
-const {User } = require('../../Models/Index');
+const { User } = require('../../Models/Index');
 
 const forgetPasswordValidationRules = () => {
     return [
@@ -26,13 +26,6 @@ const loginValidationRules = () => {
             if (!value) {
                 throw new Error('Email or username is required');
             }
-            // if (!validator.isEmail(value)) {
-            //     throw new Error('Invalid email format');
-            // }
-            // const existingUser = await User.findOne({ where: { email: value } });
-            // if (!existingUser) {
-            //     throw new Error('Invalid email or Password');
-            // }
             return true;
         }),
         body('password')
@@ -94,7 +87,7 @@ const passwordValidationRules = () => {
                 throw new Error('Confirm Password is required');
             }
         })
-    ]
+    ];
 };
 
 module.exports = {
