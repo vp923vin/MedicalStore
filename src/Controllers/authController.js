@@ -7,7 +7,7 @@ const { User, Role, OTPManager } = require('../Models/Index');
 
 const { appConfig } = require('../Configs/app');
 const { generateToken, generatePayloadToken, decodeToken } = require('../Services/Utils/jwtToken');
-const { hashPassword, comparePassword } = require('../Services/Utils/hashPasswordService');
+const { hashPassword, comparePassword, compareMPIN } = require('../Services/Utils/hashPasswordService');
 const formatErrors = require('../Services/Utils/formErrorFormat');
 const { sendMail } = require('../Services/Utils/mailService');
 const { generateRandomNumber } = require('../Services/Utils/randomNumGen');
@@ -115,32 +115,42 @@ const login = async (req, res) => {
             errors: formattedErrors,
         });
     }
+
     const { email, password } = req.body;
+
     try {
-        // password less functionality add
-        const user = await User.scope('withPassword').findOne({ where: { email } });
+        let user = await User.scope('withSensitiveInfo').findOne({ where: { email: email } });
+
+        if (!user) {
+            user = await User.scope('withSensitiveInfo').findOne({ where: { username: email } });
+        }
+
         if (!user) {
             return res.status(400).json({
                 status: 'failed',
                 statusCode: 400,
                 message: 'Validation Failed',
                 errors: [
-                    { message: 'Invalid email or password' }
+                    { message: 'Invalid email or password1' }
                 ]
             });
         }
+
         const passCompare = await comparePassword(password, user.password);
-        if (!passCompare) {
+        const mpinCompare = await compareMPIN(password, user.mpin);
+
+        if (!passCompare && !mpinCompare) {
             return res.status(400).json({
                 status: 'failed',
                 statusCode: 400,
                 message: 'Validation Failed',
                 errors: [
-                    { message: 'Invalid email or password' }
+                    { message: 'Invalid email or password2' }
                 ]
             });
         }
-        if(user.is_active !== 'active'){
+
+        if (user.is_active !== 'active') {
             return res.status(400).json({
                 status: 'failed',
                 statusCode: 400,
@@ -150,6 +160,7 @@ const login = async (req, res) => {
                 ]
             });
         }
+
         const token = await generateToken(user);
         return res.status(200).json({
             status: 'success',
@@ -166,7 +177,7 @@ const login = async (req, res) => {
             error: error.message
         });
     }
-}; 
+}; // completed
 
 const verifyEmail = async (req, res) => {
     const errors = validationResult(req);

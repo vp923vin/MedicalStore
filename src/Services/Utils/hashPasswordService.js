@@ -24,7 +24,21 @@ const comparePassword = async (password, userPassword) => {
   }
 };
 
+const compareMPIN = async (mpin, userMpin) => {
+  try {
+      if (!mpin || !userMpin) {
+          console.error('Missing mpin or userMpin:', { mpin, userMpin });
+          throw new Error('Invalid mpin');
+      }
+      return await bcrypt.compare(mpin, userMpin);
+  } catch (error) {
+      console.error('Error in comparempin function:', error);
+      throw new Error('Invalid mpin');
+  }
+};
+
 module.exports = {
     hashPassword, 
-    comparePassword 
+    comparePassword,
+    compareMPIN
 };

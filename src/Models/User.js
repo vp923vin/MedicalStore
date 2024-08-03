@@ -76,7 +76,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     scopes: {
       // Define a scope to include the password
-      withPassword: {
+      withSensitiveInfo: {
         attributes: { include: ['password', 'mpin'] }
       }
     }

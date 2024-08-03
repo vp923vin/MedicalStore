@@ -24,15 +24,15 @@ const loginValidationRules = () => {
     return [
         body('email').custom(async (value, { req }) => {
             if (!value) {
-                throw new Error('Email is required');
+                throw new Error('Email or username is required');
             }
-            if (!validator.isEmail(value)) {
-                throw new Error('Invalid email format');
-            }
-            const existingUser = await User.findOne({ where: { email: value } });
-            if (!existingUser) {
-                throw new Error('Invalid email or Password');
-            }
+            // if (!validator.isEmail(value)) {
+            //     throw new Error('Invalid email format');
+            // }
+            // const existingUser = await User.findOne({ where: { email: value } });
+            // if (!existingUser) {
+            //     throw new Error('Invalid email or Password');
+            // }
             return true;
         }),
         body('password')
