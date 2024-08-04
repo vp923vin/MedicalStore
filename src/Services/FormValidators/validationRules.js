@@ -218,7 +218,16 @@ const customValidationRules = (formtype) => {
                     .isInt({ gt: 0 })
                     .withMessage('Minimum quantity must be a positive integer'),
             ];
-        case '':
+        case 'category':
+            return [
+                body('category_name').custom(async (value, { req }) => {
+                    if (!value) {
+                        throw new Error('category name is required');
+                    }
+                    
+                    return true;
+                })
+            ];
         case '':
         case '':
         case '':

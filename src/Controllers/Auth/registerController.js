@@ -110,7 +110,7 @@ const verifyEmail = async (req, res) => {
             expiresAt: otpExpiry
         });
 
-        const emailTemplatePath = path.join(__dirname, '..', 'Views', 'emails', 'otpSend.ejs');
+        const emailTemplatePath = path.join(__dirname, '../..', 'Views', 'emails', 'otpSend.ejs');
 
         const emailTemplate = await ejs.renderFile(emailTemplatePath, {
             name: 'user',
@@ -282,7 +282,7 @@ const resendEmailOTP = async function(req, res) {
             expiresAt: otpExpiry
         });
     
-        const emailTemplatePath = path.join(__dirname, '..', 'Views', 'emails', 'otpSend.ejs');
+        const emailTemplatePath = path.join(__dirname, '../..', 'Views', 'emails', 'otpSend.ejs');
         const emailTemplate = await ejs.renderFile(emailTemplatePath, {
             name: 'user',
             otp: otp,

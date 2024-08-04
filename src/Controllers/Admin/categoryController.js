@@ -1,18 +1,7 @@
-const Category = require('../Models/Category');
 const { validationResult } = require('express-validator');
-const formatErrors = require('../Services/Utils/formErrorFormat');
+const { Category} = require('../../Models/Index');
 
 const createCategory = async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        const formattedErrors = formatErrors(errors.array());
-        return res.status(400).json({
-            status: 'failed',
-            statusCode: 400,
-            message: "Validation Failed",
-            errors: formattedErrors,
-        });
-    }
     const { category_name } = req.body;
     try {
         const existingCategory = await Category.findOne({ where: { category_name } });

@@ -1,21 +1,15 @@
 const express = require('express');
 
-const { roleValidationRules } = require('../Services/FormValidators/roleValidation');
-const { categoryValidatorRules } = require('../Services/FormValidators/customValidation');
-const { productValidationRules } = require('../Services/FormValidators/productValidation');
-const { inventoryValidationRules } = require('../Services/FormValidators/inventoryValidation');
-
-const { 
-    createRole, 
-    getRoles,
-    getRoleById, 
-    updateRole, 
-    deleteRole, 
-    listAllUsers,
-    getUserProfile, 
-    updateUserProfile, 
-    deleteUserProfile 
-} = require('../Controllers/adminController');
+const {
+    createRole,
+    getRoleById,
+    getRolesByPagination,
+    updateRole,
+    deleteRole,
+    getTrashListRoles,
+    permanentlyDeleteRole,
+    multiDeleteRolePermanently
+} = require('../Controllers/Admin/roleController');
 
 const {
     createCategory,
@@ -23,7 +17,7 @@ const {
     getCategoriesById,
     updateCategory,
     deleteCategory,
-} = require('../Controllers/categoryController');
+} = require('../Controllers/Admin/categoryController');
 
 const {
     createProduct,
@@ -31,7 +25,7 @@ const {
     getProductById,
     updateProduct,
     deleteProduct,
-} = require('../Controllers/productController');
+} = require('../Controllers/Admin/productController');
 
 const {
     createInventory,
@@ -40,53 +34,62 @@ const {
     deleteInventory,
     updateLastRestocked,
     updateLastSold
-} = require('../Controllers/inventoryController');
+} = require('../Controllers/Admin/inventoryController');
 
 const authMiddleware = require('../Middlewares/authMiddleware');
 const roleMiddleware = require('../Middlewares/roleMiddleware');
 const upload = require('../Services/Utils/imageUpload');
-
+const validate = require('../Services/FormValidators/validationRules')
 const router = express.Router();
 
-router.get('/', 
-(req, res) => {
-    res.send("Hello, world!");
-});
+router.get('/',
+    (req, res) => {
+        res.send("Hello, world!");
+    });
 
-// roles
-router.post('/create-role', roleValidationRules(), authMiddleware, roleMiddleware('admin'), createRole);
-router.get('/all-roles', authMiddleware, roleMiddleware('admin'), getRoles);
+// roles manage
+router.post('/create-role', validate('role'), authMiddleware, roleMiddleware('admin'), createRole);
 router.get('/single-role/:roleId', authMiddleware, roleMiddleware('admin'), getRoleById);
-router.put('/update-role/:roleId', roleValidationRules(), authMiddleware, roleMiddleware('admin'), updateRole);
-router.delete('/delete-role/:roleId', authMiddleware, roleMiddleware('admin'), deleteRole);
+router.get('/roles', authMiddleware, roleMiddleware('admin'), getRolesByPagination);
+router.put('/update-role/:roleId', validate('role'), authMiddleware, roleMiddleware('admin'), updateRole);
+router.post('/delete-role/:roleId', authMiddleware, roleMiddleware('admin'), deleteRole); // timestamp
+router.get('/roles/trash-list', getTrashListRoles);
+router.delete('/roles/permanently-delete', permanentlyDeleteRole);
+router.delete('/roles/permanently-multiple-delete', multiDeleteRolePermanently);
 
-// users
+// users manage
 router.get('/all-user', authMiddleware, roleMiddleware('admin'), listAllUsers);
-router.get('/fetch-user/:userId', authMiddleware, roleMiddleware('admin'),  getUserProfile);
+router.get('/fetch-user/:userId', authMiddleware, roleMiddleware('admin'), getUserProfile);
 router.put('/update-user/:userId', authMiddleware, roleMiddleware('admin'), updateUserProfile);
-router.delete('/delete-user/:userId', authMiddleware, roleMiddleware('admin'), deleteUserProfile);
+router.post('/delete-user/:userId', authMiddleware, roleMiddleware('admin'), deleteUserProfile);
+router.get('/users/trash-list');
+router.delete('/users/permanently-delete');
 
-// product category
-router.post('/create-category', categoryValidatorRules(), authMiddleware, roleMiddleware('admin'), createCategory);
+// product category manage
+router.post('/create-category', validate('category'), authMiddleware, roleMiddleware('admin'), createCategory);
 router.get('/all-category', authMiddleware, roleMiddleware('admin'), getCategories);
 router.get('/single-category/:categoryId', authMiddleware, roleMiddleware('admin'), getCategoriesById);
 router.put('/update-category/:categoryId', authMiddleware, roleMiddleware('admin'), updateCategory);
-router.delete('/delete-category/:categoryId', authMiddleware, roleMiddleware('admin'), deleteCategory);
+router.post('/delete-category/:categoryId', authMiddleware, roleMiddleware('admin'), deleteCategory);
+router.get('/category/trash-list');
+router.delete('/category/permanently-delete');
 
-// products
-router.post('/create-product', upload.single('product_image'), productValidationRules(), authMiddleware, roleMiddleware('admin'), createProduct); 
-router.get('/all-products', authMiddleware, roleMiddleware('admin'), getProducts);  
-router.get('/single-product/:productId', authMiddleware, roleMiddleware('admin'), getProductById);  
-router.put('/update-product/:productId', authMiddleware, roleMiddleware('admin'), updateProduct);  
-router.delete('/delete-product/:productId', authMiddleware, roleMiddleware('admin'), deleteProduct);  
+// products manage
+router.post('/create-product', upload.single('product_image'), validate('product'), authMiddleware, roleMiddleware('admin'), createProduct);
+router.get('/all-products', authMiddleware, roleMiddleware('admin'), getProducts);
+router.get('/single-product/:productId', authMiddleware, roleMiddleware('admin'), getProductById);
+router.put('/update-product/:productId', authMiddleware, roleMiddleware('admin'), updateProduct);
+router.post('/delete-product/:productId', authMiddleware, roleMiddleware('admin'), deleteProduct);
+router.get('/product/trash-list');
+router.delete('/product/permanently-delete');
 
-// products
-router.post('/create-inventory', upload.single('product_image'), inventoryValidationRules(), authMiddleware, roleMiddleware('admin'), createInventory); 
-router.get('/inventory/:inventoryId', authMiddleware, roleMiddleware('admin'), getInventorieById);  
-router.put('/update-inventory/:inventoryId', inventoryValidationRules(), authMiddleware, roleMiddleware('admin'), updateInventory);  
-router.put('/update-inventory/last-restocked/:inventoryId', authMiddleware, roleMiddleware('admin'), updateLastRestocked);  
-router.put('/update-inventory/last-sold-out/:inventoryId', authMiddleware, roleMiddleware('admin'), updateLastSold);  
-router.delete('/delete-inventory/:inventoryId', authMiddleware, roleMiddleware('admin'), deleteInventory);  
+// products inventory manage
+router.post('/create-inventory', upload.single('product_image'), validate('inventory'), authMiddleware, roleMiddleware('admin'), createInventory);
+router.get('/inventory/:inventoryId', authMiddleware, roleMiddleware('admin'), getInventorieById);
+router.put('/update-inventory/:inventoryId', validate('inventory'), authMiddleware, roleMiddleware('admin'), updateInventory);
+router.put('/update-inventory/last-restocked/:inventoryId', authMiddleware, roleMiddleware('admin'), updateLastRestocked);
+router.put('/update-inventory/last-sold-out/:inventoryId', authMiddleware, roleMiddleware('admin'), updateLastSold);
+router.delete('/delete-inventory/:inventoryId', authMiddleware, roleMiddleware('admin'), deleteInventory);
 
 //
 

@@ -42,7 +42,7 @@ const forgetPassword = async (req, res) => {
             createdAt: new Date(),
             expiresAt: otpExpiry
         });
-        const emailTemplatePath = path.join(__dirname, '..', 'Views', 'emails', 'otpSend.ejs');
+        const emailTemplatePath = path.join(__dirname, '../..', 'Views', 'emails', 'otpSend.ejs');
 
         const emailTemplate = await ejs.renderFile(emailTemplatePath, {
             name: user.fullname,
@@ -214,7 +214,7 @@ const resendOTP = async (req, res) => {
             limit: 1
         });
 
-        const emailTemplatePath = path.join(__dirname, '..', 'Views', 'emails', 'otpSend.ejs');
+        const emailTemplatePath = path.join(__dirname, '../..', 'Views', 'emails', 'otpSend.ejs');
 
         const emailTemplate = await ejs.renderFile(emailTemplatePath, {
             name: user.fullname,
