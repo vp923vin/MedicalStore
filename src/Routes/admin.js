@@ -8,16 +8,38 @@ const {
     deleteRole,
     getTrashListRoles,
     permanentlyDeleteRole,
-    multiDeleteRolePermanently
+    multiDeleteRolePermanently,
+    restoreRoleById,
+    bulkRestoreRoles,
+    searchRoles,
 } = require('../Controllers/Admin/roleController');
 
-const {
+const  {
     createCategory,
-    getCategories,
-    getCategoriesById,
+    getCategoryById,
+    getCategoriesByPagination,
     updateCategory,
     deleteCategory,
+    getTrashListCategories,
+    permanentlyDeleteCategoryById,
+    multiDeleteCategoriesPermanently,
+    restoreCategory,
+    searchCategories,
+    getCategoriesWithSubCategories,
 } = require('../Controllers/Admin/categoryController');
+
+const {
+    createSubCategory,
+    getSubCategoryById,
+    getSubCategoriesByPagination,
+    updateSubCategory,
+    deleteSubCategory,
+    getTrashListSubCategories,
+    permanentlyDeleteSubCategoryById,
+    multiDeleteSubCategoriesPermanently,
+    restoreSubCategory,
+    searchSubCategories,
+} = require('../Controllers/Admin/subCategoryController');
 
 const {
     createProduct,
@@ -53,9 +75,12 @@ router.get('/single-role/:roleId', authMiddleware, roleMiddleware('admin'), getR
 router.get('/roles', authMiddleware, roleMiddleware('admin'), getRolesByPagination);
 router.put('/update-role/:roleId', validate('role'), authMiddleware, roleMiddleware('admin'), updateRole);
 router.post('/delete-role/:roleId', authMiddleware, roleMiddleware('admin'), deleteRole); // timestamp
-router.get('/roles/trash-list', getTrashListRoles);
-router.delete('/roles/permanently-delete', permanentlyDeleteRole);
-router.delete('/roles/permanently-multiple-delete', multiDeleteRolePermanently);
+router.get('/roles/trash-list', authMiddleware, roleMiddleware('admin'), getTrashListRoles);
+router.delete('/roles/permanently-delete', authMiddleware, roleMiddleware('admin'), permanentlyDeleteRole);
+router.delete('/roles/permanently-multiple-delete', authMiddleware, roleMiddleware('admin'), multiDeleteRolePermanently);
+router.get('/roles/restore-role/:roleId',  authMiddleware, roleMiddleware('admin'), restoreRoleById);
+router.get('/roles/restore-bulk',  authMiddleware, roleMiddleware('admin'), bulkRestoreRoles);
+router.get('/roles/search', authMiddleware, roleMiddleware('admin'), searchRoles);
 
 // users manage
 router.get('/all-user', authMiddleware, roleMiddleware('admin'), listAllUsers);
@@ -67,12 +92,29 @@ router.delete('/users/permanently-delete');
 
 // product category manage
 router.post('/create-category', validate('category'), authMiddleware, roleMiddleware('admin'), createCategory);
-router.get('/all-category', authMiddleware, roleMiddleware('admin'), getCategories);
-router.get('/single-category/:categoryId', authMiddleware, roleMiddleware('admin'), getCategoriesById);
+router.get('/categories', authMiddleware, roleMiddleware('admin'), getCategoriesByPagination);
+router.get('/single-category/:categoryId', authMiddleware, roleMiddleware('admin'), getCategoryById);
 router.put('/update-category/:categoryId', authMiddleware, roleMiddleware('admin'), updateCategory);
 router.post('/delete-category/:categoryId', authMiddleware, roleMiddleware('admin'), deleteCategory);
-router.get('/category/trash-list');
-router.delete('/category/permanently-delete');
+router.get('/categories/trash-list', authMiddleware, roleMiddleware('admin'), getTrashListCategories);
+router.delete('/categories/permanently-delete', authMiddleware, roleMiddleware('admin'), permanentlyDeleteCategoryById);
+router.delete('/categories/permanently-multiple-delete', authMiddleware, roleMiddleware('admin'), multiDeleteCategoriesPermanently);
+router.get('/categories/restore-category', authMiddleware, roleMiddleware('admin'), restoreCategory);
+router.get('/categories/search', authMiddleware, roleMiddleware('admin'), searchCategories);
+router.get('/categories/get-category-subcategory/all',authMiddleware, roleMiddleware('admin'), getCategoriesWithSubCategories);
+
+// subcategory manages
+router.post('/create-sub-category', validate('category'), authMiddleware, roleMiddleware('admin'), createSubCategory);
+router.get('/sub-categories', authMiddleware, roleMiddleware('admin'), getSubCategoriesByPagination);
+router.get('/single-sub-category/:categoryId', authMiddleware, roleMiddleware('admin'), getSubCategoryById);
+router.put('/update-sub-category/:categoryId', authMiddleware, roleMiddleware('admin'), updateSubCategory);
+router.post('/delete-sub-category/:categoryId', authMiddleware, roleMiddleware('admin'), deleteSubCategory);
+router.get('/sub-categories/trash-list', authMiddleware, roleMiddleware('admin'), getTrashListSubCategories);
+router.delete('/sub-categories/permanently-delete', authMiddleware, roleMiddleware('admin'), permanentlyDeleteSubCategoryById);
+router.delete('/sub-categories/permanently-multiple-delete', authMiddleware, roleMiddleware('admin'), multiDeleteSubCategoriesPermanently);
+router.get('/sub-categories/restore-sub-category', authMiddleware, roleMiddleware('admin'), restoreSubCategory);
+router.get('/sub-categories/search', authMiddleware, roleMiddleware('admin'), searchSubCategories);
+
 
 // products manage
 router.post('/create-product', upload.single('product_image'), validate('product'), authMiddleware, roleMiddleware('admin'), createProduct);
@@ -91,6 +133,6 @@ router.put('/update-inventory/last-restocked/:inventoryId', authMiddleware, role
 router.put('/update-inventory/last-sold-out/:inventoryId', authMiddleware, roleMiddleware('admin'), updateLastSold);
 router.delete('/delete-inventory/:inventoryId', authMiddleware, roleMiddleware('admin'), deleteInventory);
 
-//
+
 
 module.exports = router;

@@ -1,5 +1,5 @@
-const { Role } = require('../../Models/Index');
 const { Op } = require('sequelize');
+const { Role } = require('../../Models/Index');
 
 const createRole = async (req, res) => {
     const { role_name } = req.body;
@@ -241,6 +241,86 @@ const multiDeleteRolePermanently = async (req, res) => {
     }
 };
 
+const restoreRoleById = async (req, res) => {
+    const { roleId } = req.params;
+    try {
+        const role = await Role.findByPk(roleId, { paranoid: false });
+        if (!role || !role.deletedAt) {
+            return res.status(404).json({
+                status: 'failed',
+                statusCode: 404,
+                message: 'Role not found or not deleted',
+                errors: [{ message: 'Role not found or not deleted' }],
+            });
+        }
+        await role.restore();
+        return res.status(200).json({
+            status: 'success',
+            statusCode: 200,
+            message: 'Role restored successfully',
+            data: { role },
+        });
+    } catch (error) {
+        return res.status(500).json({
+            status: 'failed',
+            statusCode: 500,
+            message: 'Something went wrong in server.',
+            error: error.message,
+        });
+    }
+};
+
+const bulkRestoreRoles = async (req, res) => {
+    const { roleIds } = req.body;
+    try {
+        const roles = await Role.findAll({
+            where: { id: roleIds },
+            paranoid: false,
+        });
+        for (const role of roles) {
+            if (role.deletedAt) {
+                await role.restore();
+            }
+        }
+        return res.status(200).json({
+            status: 'success',
+            statusCode: 200,
+            message: 'Roles restored successfully',
+            data: { roles },
+        });
+    } catch (error) {
+        return res.status(500).json({
+            status: 'failed',
+            statusCode: 500,
+            message: 'Something went wrong in server.',
+            error: error.message,
+        });
+    }
+};
+
+const searchRoles = async (req, res) => {
+    const { name } = req.query;
+    try {
+        const roles = await Role.findAll({
+            where: { role_name: { [Op.iLike]: `%${name}%` } },
+        });
+        return res.status(200).json({
+            status: 'success',
+            statusCode: 200,
+            message: 'Roles fetched successfully',
+            data: { roles },
+        });
+    } catch (error) {
+        return res.status(500).json({
+            status: 'failed',
+            statusCode: 500,
+            message: 'Something went wrong in server.',
+            error: error.message,
+        });
+    }
+};
+
+
 module.exports = {
     createRole,
     getRoleById,
@@ -250,4 +330,7 @@ module.exports = {
     getTrashListRoles,
     permanentlyDeleteRole,
     multiDeleteRolePermanently,
+    restoreRoleById,
+    bulkRestoreRoles,
+    searchRoles,
 };
