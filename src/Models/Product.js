@@ -23,15 +23,15 @@ module.exports = (sequelize, DataTypes) => {
     },
     category_id: {
       type: DataTypes.INTEGER,
-      allowNull: false
+      allowNull: true
     },
     sub_category_id: {
       type: DataTypes.INTEGER,
-      allowNull: false
+      allowNull: true
     },
     inventory_id: {
       type: DataTypes.INTEGER,
-      allowNull: false
+      allowNull: true
     },
     createdAt: {
       type: DataTypes.DATE,

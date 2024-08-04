@@ -1,12 +1,5 @@
-const multer = require('multer');
-const path = require('path');
-const { validationResult } = require('express-validator');
-
-const Product = require('../Models/Product');
-const Category = require('../Models/Category');
-
-const formatErrors = require('../Services/Utils/formErrorFormat');
-const upload = require('../Services/Utils/imageUpload');
+const { Product, Category, SubCategory, Inventory } = require('../../Models/Index');
+const upload = require('../../Services/Utils/imageUpload');
 
 const createProduct = async (req, res) => {
     upload.single('product_image')(req, res, async function (err) {
@@ -16,17 +9,6 @@ const createProduct = async (req, res) => {
                 statusCode: 400,
                 message: 'Error uploading file',
                 error: err.message
-            });
-        }
-
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            const formattedErrors = formatErrors(errors.array());
-            return res.status(400).json({
-                status: 'failed',
-                statusCode: 400,
-                message: "Validation Failed",
-                errors: formattedErrors,
             });
         }
         
@@ -56,58 +38,25 @@ const createProduct = async (req, res) => {
     });
 };
 
-const getProducts = async (req, res) => {
-    try {
-        const products = await Product.findAll({
-            include: [{ model: Category, as: 'Category' }],
-        });
-        if (!products) {
-            return res.status(200).json({
-                status: 'success',
-                statusCode: 200,
-                message: 'No products in the Record Book',
-                data: [],
-            });
-        }
-        return res.status(200).json({
-            status: 'success',
-            statusCode: 200,
-            message: 'Products fetched successfully',
-            data: {products: products},
-        });
-    } catch (error) {
-        return res.status(500).json({
-            status: 'failed',
-            statusCode: 500,
-            message: 'Something went wrong in server.',
-            error: error.message
-        });
-    }
-};
-
-const getProductById = async (req, res) => { 
+const getProductById = async (req, res) => {
     const { productId } = req.params;
     try {
-        const product = await Product.findOne({
-            where:{ product_id: productId },
-            include: [{ model: Category, as: 'Category' }],
-        });
+        const product = await Product.findByPk(productId);
         if (!product) {
             return res.status(404).json({
                 status: 'failed',
                 statusCode: 404,
-                message: 'Product not found',
-                errors: [{message: 'Product not found'}]
+                message: 'Product not found'
             });
         }
-        return res.status(200).json({
+        res.status(200).json({
             status: 'success',
             statusCode: 200,
-            message: 'Products fetched successfully',
-            data: {products: product},
+            message: 'Product fetched successfully',
+            data: { product }
         });
     } catch (error) {
-        return res.status(500).json({
+        res.status(500).json({
             status: 'failed',
             statusCode: 500,
             message: 'Something went wrong in server.',
@@ -117,17 +66,6 @@ const getProductById = async (req, res) => {
 };
 
 const updateProduct = async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        const formattedErrors = errors.array().map(err => ({ field: err.param, message: err.msg }));
-        return res.status(400).json({
-            status: 'failed',
-            statusCode: 400,
-            message: "Validation Failed",
-            errors: formattedErrors,
-        });
-    }
-
     const { productId } = req.params;
     const { category_id } = req.body;
     let product_image = null;
@@ -192,7 +130,28 @@ const updateProduct = async (req, res) => {
     }
 };
 
-const deleteProduct = async (req, res) => {
+const getProductsByPagination = async (req, res) => {
+    const { page = 1, limit = 10 } = req.query;
+    const offset = (page - 1) * limit;
+    try {
+        const { rows, count } = await Product.findAndCountAll({ offset, limit });
+        res.status(200).json({
+            status: 'success',
+            statusCode: 200,
+            message: 'Products fetched successfully',
+            data: { products: rows, total: count }
+        });
+    } catch (error) {
+        res.status(500).json({
+            status: 'failed',
+            statusCode: 500,
+            message: 'Something went wrong in server.',
+            error: error.message
+        });
+    }
+};
+
+const tempDeleteProduct = async (req, res) => {
     const { productId } = req.params;
     try {
         const product = await Product.findByPk(productId);
@@ -200,18 +159,173 @@ const deleteProduct = async (req, res) => {
             return res.status(404).json({
                 status: 'failed',
                 statusCode: 404,
-                message: 'Product not found',
-                errors: [{message: 'Product not found'}]
+                message: 'Product not found'
             });
         }
-        await product.destroy(); 
-        return res.status(200).json({
+        await product.destroy();
+        res.status(200).json({
             status: 'success',
             statusCode: 200,
-            message: 'Product deleted successfully',
+            message: 'Product temporarily deleted successfully',
+            data: { product }
         });
     } catch (error) {
-        return res.status(500).json({
+        res.status(500).json({
+            status: 'failed',
+            statusCode: 500,
+            message: 'Something went wrong in server.',
+            error: error.message
+        });
+    }
+};
+
+const bulkTempDeleteProducts = async (req, res) => {
+    const { productIds } = req.body;
+    try {
+        const products = await Product.findAll({
+            where: { product_id: { [Op.in]: productIds } }
+        });
+        if (products.length === 0) {
+            return res.status(404).json({
+                status: 'failed',
+                statusCode: 404,
+                message: 'Products not found'
+            });
+        }
+        await Product.destroy({
+            where: { product_id: { [Op.in]: productIds } }
+        });
+        res.status(200).json({
+            status: 'success',
+            statusCode: 200,
+            message: 'Products temporarily deleted successfully',
+            data: { products }
+        });
+    } catch (error) {
+        res.status(500).json({
+            status: 'failed',
+            statusCode: 500,
+            message: 'Something went wrong in server.',
+            error: error.message
+        });
+    }
+};
+
+const restoreProduct = async (req, res) => {
+    const { productId } = req.params;
+    try {
+        const product = await Product.findByPk(productId, { paranoid: false });
+        if (!product) {
+            return res.status(404).json({
+                status: 'failed',
+                statusCode: 404,
+                message: 'Product not found'
+            });
+        }
+        await product.restore();
+        res.status(200).json({
+            status: 'success',
+            statusCode: 200,
+            message: 'Product restored successfully',
+            data: { product }
+        });
+    } catch (error) {
+        res.status(500).json({
+            status: 'failed',
+            statusCode: 500,
+            message: 'Something went wrong in server.',
+            error: error.message
+        });
+    }
+};
+
+const restoreMultipleProducts = async (req, res) => {
+    const { productIds } = req.body;
+    try {
+        const products = await Product.findAll({
+            where: { product_id: { [Op.in]: productIds } },
+            paranoid: false
+        });
+        if (products.length === 0) {
+            return res.status(404).json({
+                status: 'failed',
+                statusCode: 404,
+                message: 'Products not found'
+            });
+        }
+        await Product.restore({
+            where: { product_id: { [Op.in]: productIds } }
+        });
+        res.status(200).json({
+            status: 'success',
+            statusCode: 200,
+            message: 'Products restored successfully',
+            data: { products }
+        });
+    } catch (error) {
+        res.status(500).json({
+            status: 'failed',
+            statusCode: 500,
+            message: 'Something went wrong in server.',
+            error: error.message
+        });
+    }
+};
+
+const permanentlyDeleteProduct = async (req, res) => {
+    const { productId } = req.params;
+    try {
+        const product = await Product.findByPk(productId, { paranoid: false });
+        if (!product) {
+            return res.status(404).json({
+                status: 'failed',
+                statusCode: 404,
+                message: 'Product not found'
+            });
+        }
+        await product.destroy({ force: true });
+        res.status(200).json({
+            status: 'success',
+            statusCode: 200,
+            message: 'Product permanently deleted successfully',
+            data: { product }
+        });
+    } catch (error) {
+        res.status(500).json({
+            status: 'failed',
+            statusCode: 500,
+            message: 'Something went wrong in server.',
+            error: error.message
+        });
+    }
+};
+
+const permanentlyDeleteMultipleProducts = async (req, res) => {
+    const { productIds } = req.body;
+    try {
+        const products = await Product.findAll({
+            where: { product_id: { [Op.in]: productIds } },
+            paranoid: false
+        });
+        if (products.length === 0) {
+            return res.status(404).json({
+                status: 'failed',
+                statusCode: 404,
+                message: 'Products not found'
+            });
+        }
+        await Product.destroy({
+            where: { product_id: { [Op.in]: productIds } },
+            force: true
+        });
+        res.status(200).json({
+            status: 'success',
+            statusCode: 200,
+            message: 'Products permanently deleted successfully',
+            data: { products }
+        });
+    } catch (error) {
+        res.status(500).json({
             status: 'failed',
             statusCode: 500,
             message: 'Something went wrong in server.',
@@ -222,8 +336,13 @@ const deleteProduct = async (req, res) => {
 
 module.exports = {
     createProduct,
-    getProducts,
     getProductById,
     updateProduct,
-    deleteProduct,
+    getProductsByPagination,
+    tempDeleteProduct,
+    bulkTempDeleteProducts,
+    restoreProduct,
+    restoreMultipleProducts,
+    permanentlyDeleteProduct,
+    permanentlyDeleteMultipleProducts
 };
