@@ -2,7 +2,7 @@ const { body, validationResult } = require('express-validator');
 const validator = require('validator');
 
 const { User } = require('../../Models/Index');
-const formatErrors = require('../Utils/formErrorFormat');
+const formatErrors = require('../FormValidators/formErrorFormat');
 
 const customValidationRules = (formtype) => {
     switch (formtype) {

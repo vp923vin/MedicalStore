@@ -4,8 +4,7 @@ const { User, Role, OTPManager } = require('../../Models/Index');
 const { appConfig } = require('../../Configs/app');
 const { hashPassword } = require('../../Services/Utils/hashPasswordService');
 const { generatePayloadToken, decodeToken } = require('../../Services/Utils/jwtToken');
-const { generateRandomNumber } = require('../../Services/Utils/randomNumGen');
-const { generateRandomUsername, generateMPIN, isOTPExpired } = require('../../Services/Utils/functions');
+const { generateRandomUsername, generateMPIN, isOTPExpired, generateRandomNumber } = require('../../Services/Utils/functions');
 const { sendMail } = require('../../Services/Utils/mailService');
 const sendMobileMessage = require('../../Services/Utils/sendMobileOtp');
 

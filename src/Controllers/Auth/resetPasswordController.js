@@ -5,9 +5,7 @@ const { appConfig } = require('../../Configs/app');
 const { generatePayloadToken, decodeToken } = require('../../Services/Utils/jwtToken');
 const { hashPassword } = require('../../Services/Utils/hashPasswordService');
 const { sendMail } = require('../../Services/Utils/mailService');
-const { generateRandomNumber } = require('../../Services/Utils/randomNumGen');
-const { isOTPExpired } = require('../../Services/Utils/functions');
-
+const { isOTPExpired, generateRandomNumber } = require('../../Services/Utils/functions');
 
 const forgetPassword = async (req, res) => {
     const { email } = req.body;
@@ -315,7 +313,6 @@ const resetPassword = async (req, res) => {
         });
     }
 }; // completed
-
 
 module.exports = {
     forgetPassword,
